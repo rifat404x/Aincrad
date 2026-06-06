@@ -1,12 +1,12 @@
 {
   "status": 1,
   "validKeys": [
-    "a2mbd3",
-    "REDLIST",
-    "Redlist",
-    "Abdullah"
+    "a2mbd3"
+    "redlist",
+    "abdullah"
   ],
-  "redirectUrl": "https://aincradmods.com/getkey?token=ac61f00f300646549f58ca32968b0b72",
+  "redirectUrlFile": "https://zxi-file-loader.ah4734536.workers.dev/?file=zxi.txt",
+  "redirectUrl": "https://aincradmods.com/getkey?token=bdf6a84bee36403986fa9f7a7c36e75a",
   "telegramUrl": "https://t.me/redguild",
   "musicUrl": "https://raw.githubusercontent.com/A2MBD3/Aincrad/1edca5aaab77c8cab29afacbe86059c444d6463b/a2mbd3-background.mp3"
 }
