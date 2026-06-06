@@ -22,12 +22,12 @@
 
   const CONFIG = {
     s: `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-        background:#0a0a0a;color:#0f0;padding:30px 25px;
-        border-radius:4px;z-index:2147483647;
+        background:#000;color:#0f0;padding:30px 25px;
+        border-radius:2px;z-index:2147483647;
         font-family:'Courier New',monospace;
-        text-align:center;box-shadow:0 0 40px rgba(0,255,0,0.15),inset 0 0 40px rgba(0,0,0,0.8);
-        border:1px solid #0f0;width:340px;box-sizing:border-box;
-        animation: crt-flicker 0.15s infinite;`,
+        text-align:center;box-shadow:0 0 50px rgba(0,255,0,0.1),inset 0 0 50px rgba(0,0,0,0.9);
+        border:1px solid #0f0;width:350px;box-sizing:border-box;
+        animation:crt-flicker 0.15s infinite;`,
   };
 
   let audioPlayer = null;
@@ -47,24 +47,74 @@
     if (!audioPlayer) {
       audioPlayer = new Audio(EMBEDDED_DATA.musicUrl);
       audioPlayer.loop = true;
-      audioPlayer.volume = 0.5;
+      audioPlayer.volume = 0.4;
     }
-    audioPlayer.play().catch(() => {
-      console.log("[!] Autoplay blocked, waiting for user interaction");
-    });
+    audioPlayer.play().catch(() => {});
   }
 
-  function typeEffect(element, text, speed = 50) {
-    let i = 0;
-    element.textContent = "";
-    const timer = setInterval(() => {
-      if (i < text.length) {
-        element.textContent += text.charAt(i);
-        i++;
-      } else {
-        clearInterval(timer);
-      }
-    }, speed);
+  function generateFakeLogs() {
+    const ipSegments = () => Math.floor(Math.random() * 256);
+    const randomIP = () => `${ipSegments()}.${ipSegments()}.${ipSegments()}.${ipSegments()}`;
+    const randomPort = () => Math.floor(Math.random() * 65535);
+    const randomHex = (len) => Array(len).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('').toUpperCase();
+    
+    const logs = [
+      { text: "[*] INITIALIZING KERNEL EXPLOIT...", color: "#0f0", delay: 0 },
+      { text: "[*] TARGET: aincrad.prime.server", color: "#0f0", delay: 300 },
+      { text: `[*] SCANNING PORTS... 22, 80, 443, 3306, 8080`, color: "#0f0", delay: 500 },
+      { text: `[+] PORT 22 OPEN - SSH DETECTED`, color: "#0f0", delay: 700 },
+      { text: `[+] PORT 3306 OPEN - MYSQL DETECTED`, color: "#0f0", delay: 800 },
+      { text: `[+] PORT 8080 OPEN - ADMIN PANEL`, color: "#ffaa00", delay: 900 },
+      { text: `[*] BRUTE-FORCING SSH CREDENTIALS...`, color: "#0f0", delay: 1100 },
+      { text: `[✓] USER: root | PASS: aincrad@${Math.floor(Math.random()*9999)}`, color: "#00ffcc", delay: 1500 },
+      { text: `[*] ESTABLISHING REVERSE SHELL...`, color: "#0f0", delay: 1800 },
+      { text: `[✓] SHELL OBTAINED - UID=0(ROOT)`, color: "#00ffcc", delay: 2100 },
+      { text: `[*] ENUMERATING SYSTEM...`, color: "#0f0", delay: 2300 },
+      { text: `[i] OS: LINUX AINCRAD-SRV 5.15.0`, color: "#888", delay: 2500 },
+      { text: `[i] CPU: 16 CORE @ 3.2GHz`, color: "#888", delay: 2600 },
+      { text: `[i] RAM: 64GB DDR4`, color: "#888", delay: 2700 },
+      { text: `[*] DUMPING /etc/shadow...`, color: "#0f0", delay: 3000 },
+      { text: `[✓] HASH DUMP COMPLETE (${Math.floor(Math.random()*20)+5} USERS)`, color: "#00ffcc", delay: 3500 },
+      { text: `[*] CRACKING PASSWORD HASHES...`, color: "#ffaa00", delay: 3800 },
+      { text: `[✓] HASH: $6$${randomHex(8)} -> decrypted`, color: "#00ffcc", delay: 4300 },
+      { text: `[✓] HASH: $6$${randomHex(8)} -> decrypted`, color: "#00ffcc", delay: 4600 },
+      { text: `[*] ACCESSING MYSQL DATABASE...`, color: "#0f0", delay: 5000 },
+      { text: `[✓] DB: aincrad_users (${Math.floor(Math.random()*50000)+10000} RECORDS)`, color: "#00ffcc", delay: 5500 },
+      { text: `[✓] DB: aincrad_keys (${Math.floor(Math.random()*500)+50} RECORDS)`, color: "#00ffcc", delay: 5800 },
+      { text: `[*] EXTRACTING LICENSE DATABASE...`, color: "#ffaa00", delay: 6200 },
+      { text: `[✓] LICENSE TABLE DUMPED`, color: "#00ffcc", delay: 6700 },
+      { text: `[*] BYPASSING FIREWALL RULES...`, color: "#0f0", delay: 7000 },
+      { text: `[✓] IPTABLES FLUSHED`, color: "#00ffcc", delay: 7400 },
+      { text: `[*] DISABLING INTRUSION DETECTION...`, color: "#0f0", delay: 7700 },
+      { text: `[✓] IDS/IPS OFFLINE`, color: "#00ffcc", delay: 8100 },
+      { text: `[*] CLEARING LOG FILES...`, color: "#0f0", delay: 8500 },
+      { text: `[✓] /var/log/auth.log -> WIPED`, color: "#00ffcc", delay: 8800 },
+      { text: `[✓] /var/log/syslog -> WIPED`, color: "#00ffcc", delay: 9100 },
+      { text: `[✓] /var/log/mysql/* -> WIPED`, color: "#00ffcc", delay: 9300 },
+      { text: `[*] INSTALLING BACKDOOR...`, color: "#ffaa00", delay: 9700 },
+      { text: `[✓] PERSISTENCE ESTABLISHED`, color: "#00ffcc", delay: 10200 },
+      { text: `[*] CONNECTING TO C2 SERVER...`, color: "#0f0", delay: 10600 },
+      { text: `[✓] C2 HANDSHAKE COMPLETE`, color: "#00ffcc", delay: 11000 },
+      { text: `[*] DOWNLOADING PAYLOAD...`, color: "#ffaa00", delay: 11400 },
+      { text: `[✓] PAYLOAD: ${randomHex(16)}.enc`, color: "#00ffcc", delay: 11900 },
+      { text: `[*] DECRYPTING PAYLOAD...`, color: "#0f0", delay: 12400 },
+      { text: `[✓] DECRYPTION SUCCESS`, color: "#00ffcc", delay: 12900 },
+      { text: `[*] INJECTING INTO KERNEL SPACE...`, color: "#ff0000", delay: 13400 },
+      { text: `[✓] KERNEL MODULE LOADED`, color: "#00ffcc", delay: 14000 },
+      { text: `[*] ESCALATING PRIVILEGES...`, color: "#ff0000", delay: 14500 },
+      { text: `[✓] RING 0 ACCESS OBTAINED`, color: "#ffaa00", delay: 15100 },
+      { text: `[*] DUMPING MEMORY...`, color: "#0f0", delay: 15600 },
+      { text: `[✓] PHYSICAL MEMORY DUMPED (64GB)`, color: "#00ffcc", delay: 16200 },
+      { text: `[*] SEARCHING FOR ENCRYPTION KEYS...`, color: "#ffaa00", delay: 16800 },
+      { text: `[✓] MASTER KEY FOUND: ${randomHex(32)}`, color: "#00ffcc", delay: 17500 },
+      { text: `[*] COMPROMISING SSL/TLS...`, color: "#ff0000", delay: 18200 },
+      { text: `[✓] CERTIFICATE AUTHORITY PWNED`, color: "#ffaa00", delay: 18900 },
+      { text: `[*] FINALIZING EXPLOIT...`, color: "#ff0000", delay: 19600 },
+      { text: `[*] DEPLOYING ROOTKIT...`, color: "#ffaa00", delay: 20100 },
+      { text: `[✓] ROOTKIT ACTIVE`, color: "#00ffcc", delay: 20700 },
+    ];
+    
+    return logs;
   }
 
   (async function () {
@@ -73,41 +123,40 @@
     if (!isValid) {
       const outdatedOverlay = document.createElement("div");
       outdatedOverlay.style.cssText = `
-        position:fixed; top:0; left:0; width:100%; height:100%;
-        background:rgba(0,0,0,0.92); z-index:2147483647;
-        display:flex; align-items:center; justify-content:center;
+        position:fixed;top:0;left:0;width:100%;height:100%;
+        background:#000;z-index:2147483647;
+        display:flex;align-items:center;justify-content:center;
         font-family:'Courier New',monospace;
       `;
       outdatedOverlay.innerHTML = `
-        <div style="text-align:center; background:#0a0a0a;
-                    padding:35px 30px; border-radius:4px;
-                    border:1px solid #ff0000; width:340px;max-width:90vw;
-                    box-shadow:0 0 40px rgba(255,0,0,0.2),inset 0 0 30px rgba(0,0,0,0.8);
+        <div style="text-align:center;background:#000;
+                    padding:35px 30px;border:1px solid #ff0000;
+                    width:360px;max-width:90vw;
+                    box-shadow:0 0 50px rgba(255,0,0,0.2),inset 0 0 40px rgba(0,0,0,0.9);
                     animation:crt-flicker 0.15s infinite;">
-          <div style="font-size:42px; margin-bottom:15px;filter:drop-shadow(0 0 10px #ff0000);">[!]</div>
-          <h3 style="margin:0 0 10px 0;color:#ff0000;font-size:18px;font-weight:bold;
-                     letter-spacing:2px;text-shadow:0 0 15px #ff0000;">
-            >> SCRIPT OUTDATED <<
+          <pre style="color:#ff0000;font-size:10px;margin:0 0 12px 0;text-shadow:0 0 10px #ff0000;">
+╔══════════════════════╗
+║  [!] SECURITY BREACH ║
+╚══════════════════════╝</pre>
+          <h3 style="margin:0 0 8px 0;color:#ff0000;font-size:16px;
+                     letter-spacing:2px;text-shadow:0 0 20px #ff0000;">
+            >> EXPLOIT OUTDATED <<
           </h3>
-          <p style="margin:0 0 20px 0;color:#888;font-size:12px;">
-            [ERROR]::version_mismatch<br>
-            [INFO]::update_required
+          <p style="margin:0 0 18px 0;color:#666;font-size:11px;line-height:1.6;">
+            [ERROR]::signature_mismatch<br>
+            [ERROR]::version_deprecated<br>
+            [INFO]::fetch_latest_exploit
           </p>
           <button id="update-btn" style="
-            width:100%;background:#1a0000;color:#ff0000;border:1px solid #ff0000;
-            padding:12px;border-radius:2px;font-weight:bold;cursor:pointer;
-            font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;
-            box-shadow:0 0 15px rgba(255,0,0,0.2);
-            transition:all 0.2s ease;">[ GET_UPDATE ]</button>
+            width:100%;background:#0a0000;color:#ff0000;border:1px solid #ff0000;
+            padding:12px;font-weight:bold;cursor:pointer;
+            font-family:'Courier New',monospace;font-size:12px;letter-spacing:2px;
+            box-shadow:0 0 20px rgba(255,0,0,0.15);
+            transition:all 0.2s ease;">[ DOWNLOAD_LATEST ]</button>
         </div>
         <style>
           @keyframes crt-flicker {
-            0% { opacity: 0.98; }
-            5% { opacity: 1; }
-            10% { opacity: 0.96; }
-            15% { opacity: 1; }
-            50% { opacity: 0.99; }
-            100% { opacity: 1; }
+            0%{opacity:0.97;}5%{opacity:1;}10%{opacity:0.95;}15%{opacity:1;}50%{opacity:0.98;}100%{opacity:1;}
           }
         </style>
       `;
@@ -116,7 +165,6 @@
       document.getElementById("update-btn").addEventListener("click", () => {
         window.open(EMBEDDED_DATA.telegramUrl, "_blank");
       });
-      
       return;
     }
 
@@ -126,45 +174,32 @@
     const styleEl = document.createElement("style");
     styleEl.textContent = `
       @keyframes crt-flicker {
-        0% { opacity: 0.98; }
-        5% { opacity: 1; }
-        10% { opacity: 0.96; }
-        15% { opacity: 1; }
-        50% { opacity: 0.99; }
-        100% { opacity: 1; }
+        0%{opacity:0.97;}5%{opacity:1;}10%{opacity:0.95;}15%{opacity:1;}50%{opacity:0.98;}100%{opacity:1;}
       }
       @keyframes scan-line {
-        0% { transform: translateY(-100%); }
-        100% { transform: translateY(100vh); }
-      }
-      @keyframes glitch {
-        0% { transform: translate(0); }
-        20% { transform: translate(-2px, 2px); }
-        40% { transform: translate(-2px, -2px); }
-        60% { transform: translate(2px, 2px); }
-        80% { transform: translate(2px, -2px); }
-        100% { transform: translate(0); }
+        0%{transform:translateY(-100%);}100%{transform:translateY(100vh);}
       }
       @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
-      }
-      @keyframes matrix-rain {
-        0% { background-position: 0 0; }
-        100% { background-position: 0 100%; }
+        0%,100%{opacity:1;}50%{opacity:0;}
       }
       @keyframes terminal-glow {
-        0% { box-shadow: 0 0 10px rgba(0,255,0,0.2),inset 0 0 30px rgba(0,0,0,0.8); }
-        50% { box-shadow: 0 0 25px rgba(0,255,0,0.35),inset 0 0 50px rgba(0,0,0,0.9); }
-        100% { box-shadow: 0 0 10px rgba(0,255,0,0.2),inset 0 0 30px rgba(0,0,0,0.8); }
+        0%{box-shadow:0 0 10px rgba(0,255,0,0.1),inset 0 0 30px rgba(0,0,0,0.9);}
+        50%{box-shadow:0 0 25px rgba(0,255,0,0.2),inset 0 0 50px rgba(0,0,0,0.95);}
+        100%{box-shadow:0 0 10px rgba(0,255,0,0.1),inset 0 0 30px rgba(0,0,0,0.9);}
       }
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}
       }
       @keyframes countdown-pulse {
-        0%, 100% { filter: drop-shadow(0 0 8px #0f0); }
-        50% { filter: drop-shadow(0 0 20px #0f0); }
+        0%,100%{filter:drop-shadow(0 0 5px #0f0);}50%{filter:drop-shadow(0 0 15px #0f0);}
+      }
+      @keyframes matrix-bg {
+        0%{background-position:0 0;}100%{background-position:0 50px;}
+      }
+      @keyframes success-flash {
+        0%{opacity:0;transform:scale(0.8);}
+        50%{opacity:1;transform:scale(1.05);}
+        100%{opacity:1;transform:scale(1);}
       }
     `;
     document.head.appendChild(styleEl);
@@ -175,54 +210,50 @@
     authBox.innerHTML = `
       <div style="position:absolute;top:0;left:0;width:100%;height:2px;
                   background:linear-gradient(90deg,transparent,#0f0,transparent);
-                  animation:scan-line 3s linear infinite;opacity:0.3;"></div>
+                  animation:scan-line 3s linear infinite;opacity:0.2;"></div>
       
       <button id="music-btn" style="
-        position:absolute;top:12px;right:12px;
-        background:#0a0a0a;border:1px solid #0f0;
-        color:#0f0;border-radius:2px;width:30px;height:30px;
-        cursor:pointer;font-size:12px;display:flex;align-items:center;
+        position:absolute;top:10px;right:10px;
+        background:#000;border:1px solid #0f0;
+        color:#0f0;width:28px;height:28px;
+        cursor:pointer;font-size:11px;display:flex;align-items:center;
         justify-content:center;font-family:'Courier New',monospace;
-        transition:all 0.3s ease;z-index:10;">♪</button>
+        z-index:10;text-shadow:0 0 5px #0f0;">♪</button>
 
-      <div style="margin-bottom:20px;">
-        <pre style="color:#0f0;font-size:10px;margin:0;line-height:1.2;text-shadow:0 0 8px #0f0;">
-╔═══════════════════════╗
-║  [ A2MBD3 :: ROOT ]  ║
-╚═══════════════════════╝</pre>
-      </div>
+      <pre style="color:#0f0;font-size:9px;margin:0 0 15px 0;line-height:1.3;text-shadow:0 0 8px #0f0;">
+╔══════════════════════════╗
+║  [ A2MBD3 :: ROOTKIT ]  ║
+║  [ TARGET: AINCRAD ]    ║
+╚══════════════════════════╝</pre>
 
-      <p style="margin:0 0 18px 0;color:#0f0;font-size:10px;letter-spacing:2px;
+      <p style="margin:0 0 16px 0;color:#0f0;font-size:10px;letter-spacing:2px;
                 text-shadow:0 0 5px #0f0;">
         > ENTER_AUTH_KEY<span style="animation:blink 1s infinite;">_</span>
       </p>
 
-      <input type="text" id="key-input" placeholder="0xKEY_HERE" style="
-        width:100%;padding:12px;margin-bottom:14px;
-        border:1px solid #0f0;border-radius:2px;
-        background:#000;color:#0f0;text-align:center;
-        box-sizing:border-box;font-family:'Courier New',monospace;
-        font-size:12px;font-weight:bold;
-        letter-spacing:2px;outline:none;transition:all 0.3s ease;
-        box-shadow:inset 0 0 15px rgba(0,255,0,0.05);
+      <input type="text" id="key-input" placeholder="0xKEY" style="
+        width:100%;padding:12px;margin-bottom:12px;
+        border:1px solid #0f0;background:#000;color:#0f0;text-align:center;
+        font-family:'Courier New',monospace;font-size:11px;font-weight:bold;
+        letter-spacing:3px;outline:none;box-shadow:inset 0 0 20px rgba(0,255,0,0.03);
         text-transform:uppercase;"
-        onfocus="this.style.boxShadow='0 0 20px rgba(0,255,0,0.3),inset 0 0 15px rgba(0,255,0,0.1)'"
-        onblur="this.style.boxShadow='inset 0 0 15px rgba(0,255,0,0.05)'">
+        onfocus="this.style.boxShadow='0 0 25px rgba(0,255,0,0.3),inset 0 0 20px rgba(0,255,0,0.05)'"
+        onblur="this.style.boxShadow='inset 0 0 20px rgba(0,255,0,0.03)'">
 
       <button id="login-btn" style="
-        width:100%;background:#0a0a0a;color:#0f0;border:1px solid #0f0;
-        padding:12px;border-radius:2px;font-weight:bold;cursor:pointer;
-        font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
-        margin-bottom:10px;box-shadow:0 0 15px rgba(0,255,0,0.15);
-        transition:all 0.2s ease;text-shadow:0 0 5px #0f0;">[ EXECUTE ]</button>
+        width:100%;background:#000;color:#0f0;border:1px solid #0f0;
+        padding:12px;font-weight:bold;cursor:pointer;
+        font-family:'Courier New',monospace;font-size:12px;letter-spacing:2px;
+        margin-bottom:10px;box-shadow:0 0 20px rgba(0,255,0,0.1);
+        transition:all 0.2s ease;text-shadow:0 0 5px #0f0;">[ INITIATE_EXPLOIT ]</button>
 
       <button id="support-btn" style="
-        width:100%;background:#0a0a0a;color:#888;border:1px solid #333;
-        padding:12px;border-radius:2px;font-weight:bold;cursor:pointer;
-        font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
-        transition:all 0.2s ease;">[ CHANNEL ]</button>
+        width:100%;background:#000;color:#444;border:1px solid #222;
+        padding:12px;font-weight:bold;cursor:pointer;
+        font-family:'Courier New',monospace;font-size:12px;letter-spacing:2px;
+        transition:all 0.2s ease;">[ C2_CHANNEL ]</button>
 
-      <div id="status-msg" style="margin-top:14px;font-size:10px;font-weight:bold;
+      <div id="status-msg" style="margin-top:12px;font-size:9px;font-weight:bold;
                                    color:#0f0;letter-spacing:2px;
                                    text-shadow:0 0 5px #0f0;">> STANDBY_</div>
     `;
@@ -239,7 +270,7 @@
     setTimeout(() => {
       authBox.style.zIndex = "2147483647";
       if (window.innerWidth < 600) {
-        authBox.style.width = "92vw";
+        authBox.style.width = "94vw";
       }
     }, 10);
 
@@ -251,7 +282,6 @@
         musicBtn.style.textShadow = "0 0 8px #0f0";
         return;
       }
-      
       if (audioPlayer.paused) {
         audioPlayer.play().catch(() => {});
         musicBtn.textContent = "♪";
@@ -273,134 +303,164 @@
       const inputKey = keyInput.value.trim();
 
       if (!inputKey) {
-        statusEl.innerHTML = "[!] INPUT_REQUIRED";
+        statusEl.innerHTML = "[!] KEY_REQUIRED";
         statusEl.style.color = "#ff0000";
         statusEl.style.textShadow = "0 0 8px #ff0000";
         return;
       }
 
-      statusEl.innerHTML = "> AUTHENTICATING...";
+      statusEl.innerHTML = "> INITIALIZING...";
       statusEl.style.color = "#0f0";
       loginBtn.disabled = supportBtn.disabled = true;
 
       setTimeout(async () => {
         if (EMBEDDED_DATA.validKeys.includes(inputKey)) {
-          statusEl.innerHTML = "[✓] ACCESS_GRANTED";
+          statusEl.innerHTML = "[✓] KEY_ACCEPTED";
           statusEl.style.color = "#0f0";
           statusEl.style.textShadow = "0 0 8px #0f0";
 
           setTimeout(async () => {
             authBox.remove();
 
-            const loadingOverlay = document.createElement("div");
-            loadingOverlay.style.cssText = `
-              position:fixed; top:0; left:0; width:100%; height:100%;
-              background:rgba(0,0,0,0.9); z-index:2147483647;
-              display:flex; align-items:center; justify-content:center;
+            // FULL SCREEN TERMINAL OVERLAY
+            const terminalOverlay = document.createElement("div");
+            terminalOverlay.style.cssText = `
+              position:fixed;top:0;left:0;width:100%;height:100%;
+              background:#000;z-index:2147483647;
+              display:flex;align-items:center;justify-content:center;
               font-family:'Courier New',monospace;
+              overflow:hidden;
             `;
-            loadingOverlay.innerHTML = `
-              <div style="text-align:center; background:#0a0a0a;
-                          padding:30px 25px; border-radius:4px;
-                          border:1px solid #0f0; width:300px;max-width:90vw;
-                          animation:terminal-glow 2s infinite;">
-                <pre style="color:#0f0;font-size:10px;margin:0 0 18px 0;text-shadow:0 0 5px #0f0;">
-[##################] 100%
-[ LOADING MODULES  ]</pre>
-                <div style="width:35px;height:35px;
-                            border:3px solid #111;
-                            border-top:3px solid #0f0;border-radius:50%;
-                            margin:0 auto 18px auto;
-                            animation:spin 0.6s linear infinite;
-                            box-shadow:0 0 12px rgba(0,255,0,0.15);"></div>
-                <p id="check-text" style="color:#0f0;font-size:13px;
-                   font-weight:bold;margin:0;letter-spacing:2px;
-                   text-shadow:0 0 5px #0f0;">> PROCESSING...</p>
+            
+            terminalOverlay.innerHTML = `
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;
+                          background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 4px);
+                          pointer-events:none;z-index:2;"></div>
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;
+                          background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.8) 100%);
+                          pointer-events:none;z-index:1;"></div>
+              
+              <div id="terminal-container" style="
+                width:90vw;max-width:700px;height:80vh;
+                background:rgba(0,8,0,0.95);border:1px solid #0f0;
+                padding:20px;overflow-y:auto;
+                box-shadow:0 0 60px rgba(0,255,0,0.15),inset 0 0 80px rgba(0,0,0,0.8);
+                position:relative;z-index:3;
+                animation:terminal-glow 2s infinite;">
+                
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:15px;
+                            padding-bottom:10px;border-bottom:1px solid rgba(0,255,0,0.2);">
+                  <div style="width:10px;height:10px;background:#ff0000;border-radius:50%;"></div>
+                  <div style="width:10px;height:10px;background:#ffaa00;border-radius:50%;"></div>
+                  <div style="width:10px;height:10px;background:#00ff00;border-radius:50%;"></div>
+                  <span style="color:#0f0;font-size:10px;margin-left:10px;letter-spacing:1px;">
+                    root@aincrad:~# ./exploit</span>
+                </div>
+                
+                <div id="log-output" style="
+                  color:#0f0;font-size:11px;line-height:1.8;text-align:left;
+                  font-family:'Courier New',monospace;letter-spacing:0.5px;
+                  text-shadow:0 0 3px rgba(0,255,0,0.5);">
+                </div>
+
+                <div id="progress-container" style="
+                  margin-top:15px;padding-top:10px;border-top:1px solid rgba(0,255,0,0.2);
+                  display:none;">
+                  <div style="display:flex;justify-content:space-between;color:#0f0;font-size:9px;margin-bottom:5px;">
+                    <span id="progress-label">[*] EXPLOIT PROGRESS</span>
+                    <span id="progress-percent">0%</span>
+                  </div>
+                  <div style="width:100%;height:4px;background:#111;border:1px solid #0f0;">
+                    <div id="progress-bar" style="width:0%;height:100%;background:#0f0;
+                                box-shadow:0 0 10px #0f0;transition:width 0.3s linear;"></div>
+                  </div>
+                </div>
               </div>
             `;
-            document.body.appendChild(loadingOverlay);
+            document.body.appendChild(terminalOverlay);
 
-            await new Promise(res => setTimeout(res, 5000));
-            const checkText = document.getElementById("check-text");
-            checkText.innerHTML = "[✓] COMPLETE";
-            await new Promise(res => setTimeout(res, 1500));
-            loadingOverlay.remove();
+            const logOutput = document.getElementById("log-output");
+            const progressBar = document.getElementById("progress-bar");
+            const progressPercent = document.getElementById("progress-percent");
+            const progressContainer = document.getElementById("progress-container");
+            const fakeLogs = generateFakeLogs();
+            
+            // Show progress after few logs
+            setTimeout(() => {
+              progressContainer.style.display = "block";
+            }, 3000);
 
-            const redirectUrl = EMBEDDED_DATA.redirectUrl;
-            if (redirectUrl.startsWith("http")) {
-              const countdownOverlay = document.createElement("div");
-              countdownOverlay.style.cssText = `
-                position:fixed; top:0; left:0; width:100%; height:100%;
-                background:rgba(0,0,0,0.85); z-index:2147483647;
-                display:flex; align-items:center; justify-content:center;
-                font-family:'Courier New',monospace;
-              `;
+            // Type out fake logs
+            let logIndex = 0;
+            const totalLogs = fakeLogs.length;
+            const totalDuration = 25000; // 25 seconds total
+            const avgDelay = totalDuration / totalLogs;
 
-              const totalSeconds  = Math.floor(Math.random() * 4) + 22;
-              const DASH_TOTAL    = 597;
-
-              countdownOverlay.innerHTML = `
-                <div style="text-align:center;">
-                  <div style="position:relative; width:220px; height:220px;
-                              margin:0 auto; display:flex; align-items:center;
-                              justify-content:center;">
-                    <div style="position:absolute; top:50%; left:50%;
-                                width:190px; height:190px; border-radius:50%;
-                                border:1px solid rgba(0,255,0,0.1);
-                                background:transparent;
-                                box-shadow:0 0 25px rgba(0,255,0,0.08);"></div>
-                    <svg width="220" height="220"
-                         style="transform:rotate(-90deg);position:relative;z-index:3;">
-                      <circle cx="110" cy="110" r="85"
-                              fill="none"
-                              stroke="rgba(0,255,0,0.05)"
-                              stroke-width="3"></circle>
-                      <circle id="progress" cx="110" cy="110" r="85"
-                              fill="none" stroke="#0f0" stroke-width="3"
-                              stroke-dasharray="${DASH_TOTAL}"
-                              stroke-dashoffset="${DASH_TOTAL}"
-                              stroke-linecap="square"
-                              style="filter:drop-shadow(0 0 5px #0f0);
-                                     transition:stroke-dashoffset 1s linear;"></circle>
-                    </svg>
-                    <div id="countdown-text" style="
-                      position:absolute; top:50%; left:50%;
-                      transform:translate(-50%,-50%);
-                      font-size:48px;font-weight:bold;color:#0f0;
-                      font-family:'Courier New',monospace;
-                      text-shadow:0 0 15px #0f0;
-                      z-index:4;animation:countdown-pulse 1s infinite;">${totalSeconds}</div>
-                  </div>
-                  <p style="margin-top:25px;color:#0f0;font-size:14px;
-                             font-weight:bold;letter-spacing:3px;
-                             text-shadow:0 0 10px #0f0;
-                             position:relative;z-index:4;">> REDIRECTING...</p>
-                  <p style="color:#444;font-size:9px;margin-top:8px;letter-spacing:1px;">
-                    TARGET: ${redirectUrl.replace('https://','')}</p>
-                </div>
-              `;
-              document.body.appendChild(countdownOverlay);
-
-              let remaining = totalSeconds;
-              const progressCircle = countdownOverlay.querySelector("#progress");
-              const countdownText  = countdownOverlay.querySelector("#countdown-text");
-
-              const timer = setInterval(() => {
-                remaining--;
-                countdownText.textContent = remaining;
-                progressCircle.style.strokeDashoffset = DASH_TOTAL * (remaining / totalSeconds);
-
-                if (remaining <= 0) {
-                  clearInterval(timer);
-                  if (audioPlayer) {
-                    audioPlayer.pause();
-                    audioPlayer = null;
-                  }
-                  countdownOverlay.remove();
-                  window.location.replace(redirectUrl);
-                }
-              }, 1000);
+            function typeNextLog() {
+              if (logIndex < fakeLogs.length) {
+                const log = fakeLogs[logIndex];
+                const logLine = document.createElement("div");
+                logLine.style.color = log.color;
+                logLine.style.marginBottom = "2px";
+                logLine.textContent = log.text;
+                logOutput.appendChild(logLine);
+                logOutput.scrollTop = logOutput.scrollHeight;
+                
+                // Update progress
+                const progress = Math.floor(((logIndex + 1) / totalLogs) * 100);
+                progressBar.style.width = progress + "%";
+                progressPercent.textContent = progress + "%";
+                
+                logIndex++;
+                
+                // Random delay between 100ms to 800ms
+                const randomDelay = Math.random() * 700 + 100;
+                setTimeout(typeNextLog, randomDelay);
+              } else {
+                // All logs complete - show success
+                setTimeout(() => {
+                  const successLine = document.createElement("div");
+                  successLine.style.cssText = `
+                    color:#00ffcc;font-size:16px;font-weight:bold;
+                    margin-top:20px;text-align:center;
+                    text-shadow:0 0 20px #00ffcc;
+                    animation:success-flash 0.5s ease-out;
+                    letter-spacing:3px;
+                  `;
+                  successLine.innerHTML = `
+                    <br>
+                    ╔══════════════════════════════╗<br>
+                    ║  [✓] EXPLOIT SUCCESSFUL    ║<br>
+                    ║  AINCRAD FULLY COMPROMISED ║<br>
+                    ╚══════════════════════════════╝<br>
+                    <br>
+                    <span style="font-size:11px;color:#0f0;">REDIRECTING TO PANEL...</span>
+                  `;
+                  logOutput.appendChild(successLine);
+                  logOutput.scrollTop = logOutput.scrollHeight;
+                  
+                  progressBar.style.width = "100%";
+                  progressPercent.textContent = "100%";
+                  progressBar.style.background = "#00ffcc";
+                  progressBar.style.boxShadow = "0 0 20px #00ffcc";
+                  
+                  // Redirect after 2 seconds
+                  setTimeout(() => {
+                    if (audioPlayer) {
+                      audioPlayer.pause();
+                      audioPlayer = null;
+                    }
+                    terminalOverlay.remove();
+                    window.location.replace(EMBEDDED_DATA.redirectUrl);
+                  }, 2000);
+                  
+                }, 500);
+              }
             }
+
+            // Start typing logs after short delay
+            setTimeout(typeNextLog, 1000);
+
           }, 800);
         } else {
           statusEl.innerHTML = "[✗] INVALID_KEY";
