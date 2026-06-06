@@ -10,13 +10,14 @@
   }
 
   const EMBEDDED_DATA = {
-    validKeys: ["A2MBD3",
+    validKeys: ["a2mbd3",
      "REDLIST", 
      "Redlist", 
      "Abdullah"],
     redirectUrl: "https://aincradmods.com/getkey?token=bdf6a84bee36403986fa9f7a7c36e75a",
     telegramUrl: "https://t.me/redguild",
-    musicUrl: "https://raw.githubusercontent.com/yuhb8756-lab/RAMA-MODZ-MUSIC/main/music.mp3"
+    musicUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/1edca5aaab77c8cab29afacbe86059c444d6463b/a2mbd3-background.mp3",
+    statusUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/1edca5aaab77c8cab29afacbe86059c444d6463b/status.txt"
   };
 
   const CONFIG = {
@@ -32,7 +33,75 @@
 
   let audioPlayer = null;
 
+  // Status check function
+  async function checkStatus() {
+    try {
+      const response = await fetch(EMBEDDED_DATA.statusUrl);
+      const status = await response.text();
+      return status.trim() === "1";
+    } catch (error) {
+      console.error("Status check failed:", error);
+      return false;
+    }
+  }
+
+  // Initialize audio player
+  function initAudio() {
+    if (!audioPlayer) {
+      audioPlayer = new Audio(EMBEDDED_DATA.musicUrl);
+      audioPlayer.loop = true;
+      audioPlayer.volume = 0.5; // Default volume 50%
+    }
+    audioPlayer.play().catch(() => {
+      console.log("Autoplay blocked, waiting for user interaction");
+    });
+  }
+
   (async function () {
+    // Check status first
+    const isValid = await checkStatus();
+    
+    if (!isValid) {
+      // Outdated - redirect to Telegram
+      const outdatedOverlay = document.createElement("div");
+      outdatedOverlay.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(3,7,18,0.9); backdrop-filter:blur(8px);
+        -webkit-backdrop-filter:blur(8px); z-index:2147483647;
+        display:flex; align-items:center; justify-content:center;
+        font-family:system-ui,-apple-system,sans-serif;
+      `;
+      outdatedOverlay.innerHTML = `
+        <div style="text-align:center; background:rgba(6,10,23,0.95);
+                    padding:35px 30px; border-radius:16px;
+                    border:2px solid #ff4444; width:320px;
+                    box-shadow:0 0 30px rgba(255,68,68,0.3);">
+          <div style="font-size:48px; margin-bottom:15px;">⚠️</div>
+          <h3 style="margin:0 0 10px 0;color:#ff4444;font-size:20px;font-weight:800;
+                     letter-spacing:1.5px;text-shadow:0 0 12px rgba(255,68,68,0.5);">
+            SCRIPT OUTDATED
+          </h3>
+          <p style="margin:0 0 20px 0;color:#94a3b8;font-size:13px;font-weight:600;">
+            This version is no longer supported.<br>Please update from our channel.
+          </p>
+          <button id="update-btn" style="
+            width:100%;background:#229ED9;color:#fff;border:none;
+            padding:12px;border-radius:8px;font-weight:700;cursor:pointer;
+            font-size:14px;letter-spacing:0.5px;
+            box-shadow:0 4px 12px rgba(34,158,217,0.25);
+            transition:all 0.2s ease;">GO TO UPDATE CHANNEL</button>
+        </div>
+      `;
+      document.body.appendChild(outdatedOverlay);
+      
+      document.getElementById("update-btn").addEventListener("click", () => {
+        window.open(EMBEDDED_DATA.telegramUrl, "_blank");
+      });
+      
+      return; // Stop execution
+    }
+
+    // If status is valid (1), continue with normal flow
     const existingBox = document.getElementById("auth-box");
     if (existingBox) existingBox.remove();
 
@@ -65,10 +134,10 @@
       <button id="music-btn" style="
         position:absolute;top:15px;right:15px;
         background:rgba(255,255,255,0.05);border:1px solid rgba(0,255,204,0.3);
-        color:#ff4444;border-radius:50%;width:32px;height:32px;
+        color:#00ffcc;border-radius:50%;width:32px;height:32px;
         cursor:pointer;font-size:14px;display:flex;align-items:center;
         justify-content:center;box-shadow:0 0 8px rgba(0,0,0,0.3);
-        transition:all 0.3s ease;z-index:10;">🔇</button>
+        transition:all 0.3s ease;z-index:10;">🔊</button>
 
       <h3 style="margin:0 0 6px 0;color:#00ffcc;font-size:20px;letter-spacing:1.5px;
                  font-weight:800;text-shadow:0 0 12px rgba(0,255,204,0.5);">
@@ -103,6 +172,9 @@
     `;
     document.body.appendChild(authBox);
 
+    // Initialize audio and start playing by default
+    initAudio();
+
     const musicBtn    = document.getElementById("music-btn");
     const keyInput    = document.getElementById("key-input");
     const loginBtn    = document.getElementById("login-btn");
@@ -117,11 +189,15 @@
       }
     }, 10);
 
+    // Music toggle button
     musicBtn.addEventListener("click", async () => {
       if (!audioPlayer) {
-        audioPlayer = new Audio(EMBEDDED_DATA.musicUrl);
-        audioPlayer.loop = true;
+        initAudio();
+        musicBtn.textContent = "🔊";
+        musicBtn.style.color = "#00ffcc";
+        return;
       }
+      
       if (audioPlayer.paused) {
         audioPlayer.play().catch(() => {});
         musicBtn.textContent = "🔊";
