@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  if (typeof window.RAMA_BOOKMARK_LOAD === "undefined") {
+  if (typeof window.ABDULLAH_BOOKMARK_LOAD === "undefined") {
     console.log(
       "%cAccess Denied - Bookmark Required",
       "color:#ff0000;font-size:15px;font-weight:bold"
@@ -28,7 +28,7 @@
         font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
         text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.6);
         border:2px solid #00ffcc;width:300px;box-sizing:border-box;
-        animation: rama-lightning-glow 3s linear infinite;`,
+        animation: abdullah-lightning-glow 3s linear infinite;`,
   };
 
   let audioPlayer = null;
