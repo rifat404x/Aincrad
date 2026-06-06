@@ -33,37 +33,59 @@
     if (!audioPlayer) {
       audioPlayer = new Audio(EMBEDDED_DATA.musicUrl);
       audioPlayer.loop = true;
-      audioPlayer.volume = 0.4;
+      audioPlayer.volume = 0.35;
     }
     audioPlayer.play().catch(() => {});
   }
 
   function generateFakeLogs() {
     const randomHex = (len) => Array(len).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('').toUpperCase();
+    const randomIP = () => `${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}`;
+    const randomPort = () => [22, 80, 443, 3306, 8080, 8443, 9090, 3000, 5000, 27017][Math.floor(Math.random()*10)];
+    const protocols = ["SSH", "HTTPS", "MySQL", "MongoDB", "Redis", "FTP", "SMTP", "DNS"];
+    const statusCodes = ["200 OK", "302 FOUND", "403 FORBIDDEN", "500 ERROR", "200 OK", "200 OK", "301 MOVED"];
     
     return [
-      { text: "INITIALIZING KERNEL EXPLOIT", color: "#00ffff", icon: "⚡" },
-      { text: "TARGET ACQUIRED: aincrad.prime.server", color: "#00ffff", icon: "🎯" },
-      { text: "SCANNING NETWORK PERIMETER", color: "#00ffff", icon: "🔍" },
-      { text: "PORT 22 (SSH) - VULNERABLE", color: "#ff9900", icon: "⚠" },
-      { text: "PORT 3306 (MYSQL) - OPEN", color: "#ff9900", icon: "⚠" },
-      { text: "BRUTE-FORCING CREDENTIALS", color: "#00ffff", icon: "🔑" },
-      { text: "ACCESS GRANTED: root@aincrad", color: "#00ff88", icon: "✓" },
-      { text: "ESTABLISHING ENCRYPTED TUNNEL", color: "#00ffff", icon: "🔒" },
-      { text: "BYPASSING FIREWALL (LAYER 7)", color: "#ff6600", icon: "🔥" },
-      { text: "DUMPING DATABASE: aincrad_users", color: "#00ffff", icon: "📊" },
-      { text: "EXTRACTING LICENSE KEYS", color: "#ff9900", icon: "💎" },
-      { text: "MEMORY DUMP IN PROGRESS", color: "#00ffff", icon: "🧠" },
-      { text: "ENCRYPTION KEY FOUND: " + randomHex(16), color: "#00ff88", icon: "🔓" },
-      { text: "DISABLING INTRUSION DETECTION", color: "#ff6600", icon: "🛡" },
-      { text: "CLEARING LOG FILES", color: "#00ffff", icon: "🧹" },
-      { text: "INSTALLING PERSISTENCE", color: "#ff9900", icon: "💉" },
-      { text: "KERNEL MODULE INJECTED", color: "#ff0066", icon: "☠" },
-      { text: "RING 0 ACCESS OBTAINED", color: "#ff0066", icon: "☠" },
-      { text: "COMPROMISING SSL/TLS", color: "#ff6600", icon: "🔓" },
-      { text: "MASTER KEY EXTRACTED", color: "#00ff88", icon: "🏆" },
-      { text: "FINALIZING EXPLOIT CHAIN", color: "#00ffff", icon: "⚙" },
-      { text: "AINCRAD FULLY COMPROMISED", color: "#00ff88", icon: "✓" },
+      { text: "⚡ INITIALIZING EXPLOIT FRAMEWORK v4.2.1", color: "#00ffff", delay: 200 },
+      { text: "⚡ LOADING MODULES: [0x" + randomHex(8) + "]", color: "#00ffff", delay: 350 },
+      { text: "🎯 TARGET LOCKED: aincrad.prime.server:443", color: "#ff9900", delay: 400 },
+      { text: "🔍 SCANNING: " + randomIP() + "/24", color: "#00ffff", delay: 300 },
+      { text: "⚠ PORT " + randomPort() + " OPEN - " + protocols[Math.floor(Math.random()*8)], color: "#ff9900", delay: 450 },
+      { text: "⚠ VULNERABILITY: CVE-2024-" + Math.floor(Math.random()*9000+1000), color: "#ff6600", delay: 380 },
+      { text: "🔑 BRUTE-FORCE SSH: root@" + randomIP(), color: "#00ffff", delay: 500 },
+      { text: "✓ CREDENTIALS: root:" + randomHex(12), color: "#00ff88", delay: 600 },
+      { text: "🔒 TLS HANDSHAKE: " + randomHex(32), color: "#00ffff", delay: 420 },
+      { text: "📊 SQL INJECTION: aincrad_users", color: "#ff9900", delay: 480 },
+      { text: "✓ ROWS EXTRACTED: " + Math.floor(Math.random()*90000+10000), color: "#00ff88", delay: 550 },
+      { text: "💎 LICENSE TABLE: " + Math.floor(Math.random()*5000+500) + " KEYS", color: "#00ff88", delay: 400 },
+      { text: "🔥 BYPASSING WAF: Layer 7 Rule #" + Math.floor(Math.random()*99+1), color: "#ff6600", delay: 350 },
+      { text: "🧠 MEMORY DUMP: 0x" + randomHex(16), color: "#00ffff", delay: 500 },
+      { text: "🔓 AES-256 KEY: " + randomHex(32), color: "#00ff88", delay: 600 },
+      { text: "🛡 DISABLING IDS/IPS: Snort Rule " + Math.floor(Math.random()*99999), color: "#ff6600", delay: 450 },
+      { text: "🧹 CLEARING: /var/log/auth.log", color: "#00ffff", delay: 300 },
+      { text: "🧹 CLEARING: /var/log/syslog", color: "#00ffff", delay: 280 },
+      { text: "🧹 CLEARING: ~/.bash_history", color: "#00ffff", delay: 320 },
+      { text: "💉 BACKDOOR: /tmp/.x11_" + randomHex(6), color: "#ff0066", delay: 500 },
+      { text: "☠ KERNEL MODULE: rootkit_" + randomHex(4) + ".ko", color: "#ff0066", delay: 550 },
+      { text: "☠ RING 0 ACCESS: GRANTED", color: "#ff0066", delay: 600 },
+      { text: "🔓 SSL PFS COMPROMISED: " + randomHex(48), color: "#ff6600", delay: 480 },
+      { text: "📡 C2 BEACON: " + randomIP() + ":" + randomPort(), color: "#00ffff", delay: 400 },
+      { text: "✓ HEARTBEAT: ESTABLISHED (3s interval)", color: "#00ff88", delay: 350 },
+      { text: "📦 PAYLOAD: " + randomHex(20) + ".enc", color: "#ff9900", delay: 450 },
+      { text: "✓ DECRYPTION: SUCCESS", color: "#00ff88", delay: 500 },
+      { text: "⚙ COMPILING: shellcode_0x" + randomHex(4), color: "#00ffff", delay: 380 },
+      { text: "✓ INJECTION: PID " + Math.floor(Math.random()*30000+1000), color: "#00ff88", delay: 420 },
+      { text: "🏆 PRIVILEGE ESCALATION: uid=0(root)", color: "#ff0066", delay: 600 },
+      { text: "📋 PASSWORD CACHE: " + Math.floor(Math.random()*200+50) + " hashes", color: "#00ffff", delay: 480 },
+      { text: "🔐 HASH CRACKED: $6$" + randomHex(8) + " → password" + Math.floor(Math.random()*999), color: "#00ff88", delay: 550 },
+      { text: "🗄 DATABASE: aincrad_production", color: "#ff9900", delay: 400 },
+      { text: "✓ EXPORT: " + Math.floor(Math.random()*900+100) + "MB", color: "#00ff88", delay: 450 },
+      { text: "🌐 REVERSE PROXY: 0.0.0.0:" + randomPort(), color: "#00ffff", delay: 380 },
+      { text: "🔗 CHAIN: " + randomHex(64), color: "#ff6600", delay: 500 },
+      { text: "✓ VALIDATION: BLOCKCHAIN VERIFIED", color: "#00ff88", delay: 420 },
+      { text: "⚡ FINALIZING EXPLOIT SEQUENCE", color: "#ff9900", delay: 600 },
+      { text: "✓ EXPLOIT CHAIN: COMPLETE", color: "#00ff88", delay: 500 },
+      { text: "⬡ SYSTEM COMPROMISED: AINCRAD", color: "#00ff88", delay: 700 },
     ];
   }
 
@@ -75,7 +97,9 @@
       pointer-events:none;z-index:2147483646;
     `;
     
-    for (let i = 0; i < 50; i++) {
+    const particleCount = window.innerWidth < 600 ? 25 : 45;
+    
+    for (let i = 0; i < particleCount; i++) {
       const particle = document.createElement("div");
       const size = Math.random() * 2.5 + 1;
       const colors = ["#00ffff", "#ff0066", "#ff9900", "#00ff88", "#6600ff"];
@@ -105,7 +129,7 @@
       position:fixed;top:0;left:0;width:100%;height:100%;
       pointer-events:none;z-index:2147483645;
       background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L55 20v30L30 60 5 50V20L30 5z' fill='none' stroke='%2300ffff' stroke-width='0.3' opacity='0.06'/%3E%3C/svg%3E");
-      background-size:70px 70px;
+      background-size:${window.innerWidth < 600 ? '50px' : '70px'} ${window.innerWidth < 600 ? '50px' : '70px'};
       animation:hex-rotate 35s linear infinite;
     `;
     document.body.appendChild(grid);
@@ -122,27 +146,6 @@
     document.body.appendChild(lines);
   }
 
-  function createCornerDecorations() {
-    const corners = [
-      { top: "15px", left: "15px", borderTop: "1.5px solid rgba(0,255,255,0.4)", borderLeft: "1.5px solid rgba(0,255,255,0.4)" },
-      { top: "15px", right: "15px", borderTop: "1.5px solid rgba(0,255,255,0.4)", borderRight: "1.5px solid rgba(0,255,255,0.4)" },
-      { bottom: "15px", left: "15px", borderBottom: "1.5px solid rgba(0,255,255,0.4)", borderLeft: "1.5px solid rgba(0,255,255,0.4)" },
-      { bottom: "15px", right: "15px", borderBottom: "1.5px solid rgba(0,255,255,0.4)", borderRight: "1.5px solid rgba(0,255,255,0.4)" },
-    ];
-    
-    corners.forEach((pos) => {
-      const corner = document.createElement("div");
-      corner.style.cssText = `
-        position:fixed;width:30px;height:30px;
-        z-index:2147483645;pointer-events:none;
-        ${Object.entries(pos).map(([k, v]) => `${k}:${v}`).join(';')};
-        box-shadow:0 0 10px rgba(0,255,255,0.2);
-        animation:corner-pulse 2.5s ease-in-out infinite;
-      `;
-      document.body.appendChild(corner);
-    });
-  }
-
   (async function () {
     const isValid = await checkStatus();
     
@@ -153,28 +156,30 @@
         background:rgba(2,2,15,0.96);z-index:2147483647;
         display:flex;align-items:center;justify-content:center;
         font-family:'Rajdhani','Orbitron','Segoe UI',sans-serif;
-        backdrop-filter:blur(5px);
+        backdrop-filter:blur(5px);padding:20px;
       `;
       outdatedOverlay.innerHTML = `
         <div style="text-align:center;position:relative;
                     background:linear-gradient(135deg,rgba(255,0,0,0.05),rgba(0,0,0,0.85));
-                    padding:35px 30px;border:1px solid rgba(255,0,0,0.3);
-                    border-radius:14px;width:360px;max-width:88vw;
+                    padding:clamp(25px,5vw,35px) clamp(20px,4vw,30px);
+                    border:1px solid rgba(255,0,0,0.3);border-radius:14px;
+                    width:min(360px,88vw);
                     box-shadow:0 0 60px rgba(255,0,0,0.12),0 0 150px rgba(255,0,0,0.04);
                     backdrop-filter:blur(10px);">
-          <div style="font-size:50px;margin-bottom:12px;filter:drop-shadow(0 0 15px #ff0000);">⚠</div>
+          <div style="font-size:clamp(40px,8vw,50px);margin-bottom:12px;filter:drop-shadow(0 0 15px #ff0000);">⚠</div>
           <h3 style="margin:0 0 8px 0;background:linear-gradient(90deg,#ff0000,#ff6600);
                      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                     font-size:18px;font-weight:700;letter-spacing:3px;">EXPLOIT OUTDATED</h3>
-          <p style="margin:0 0 18px 0;color:#8899aa;font-size:11px;line-height:1.6;">
+                     font-size:clamp(16px,4vw,18px);font-weight:700;letter-spacing:3px;">EXPLOIT OUTDATED</h3>
+          <p style="margin:0 0 18px 0;color:#8899aa;font-size:clamp(10px,2.5vw,11px);line-height:1.6;">
             SIGNATURE_MISMATCH<br>VERSION_DEPRECATED
           </p>
           <button id="update-btn" style="
             width:100%;background:rgba(255,0,0,0.08);color:#ff4444;
-            border:1px solid rgba(255,0,0,0.35);padding:12px;
+            border:1px solid rgba(255,0,0,0.35);padding:clamp(10px,2vw,12px);
             border-radius:8px;font-weight:600;cursor:pointer;
-            font-family:'Rajdhani','Orbitron',sans-serif;font-size:13px;
-            letter-spacing:2px;box-shadow:0 0 25px rgba(255,0,0,0.08);
+            font-family:'Rajdhani','Orbitron',sans-serif;
+            font-size:clamp(11px,2.5vw,13px);letter-spacing:2px;
+            box-shadow:0 0 25px rgba(255,0,0,0.08);
             transition:all 0.3s ease;">⬇ DOWNLOAD LATEST</button>
         </div>
       `;
@@ -189,7 +194,6 @@
     createParticles();
     createHexGrid();
     createScanLines();
-    createCornerDecorations();
 
     const existingBox = document.getElementById("auth-box");
     if (existingBox) existingBox.remove();
@@ -220,10 +224,6 @@
         0%{transform:rotate(0deg);}
         100%{transform:rotate(360deg);}
       }
-      @keyframes corner-pulse {
-        0%,100%{opacity:0.4;box-shadow:0 0 10px rgba(0,255,255,0.2);}
-        50%{opacity:1;box-shadow:0 0 25px rgba(0,255,255,0.5);}
-      }
       @keyframes border-glow {
         0%,100%{border-color:rgba(0,255,255,0.25);box-shadow:0 0 25px rgba(0,255,255,0.08),inset 0 0 25px rgba(0,0,0,0.4);}
         50%{border-color:rgba(0,255,255,0.5);box-shadow:0 0 45px rgba(0,255,255,0.15),inset 0 0 45px rgba(0,0,0,0.6);}
@@ -253,6 +253,13 @@
         0%{top:-2px;}
         100%{top:100%;}
       }
+      @keyframes glitch-text {
+        0%{clip-path:inset(0 0 98% 0);}
+        5%{clip-path:inset(20% 0 60% 0);}
+        10%{clip-path:inset(50% 0 30% 0);}
+        15%{clip-path:inset(0 0 98% 0);}
+        100%{clip-path:inset(0 0 98% 0);}
+      }
     `;
     document.head.appendChild(styleEl);
 
@@ -262,9 +269,10 @@
       position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
       background:linear-gradient(160deg,rgba(5,8,22,0.96),rgba(10,15,35,0.96));
       backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);
-      color:#fff;padding:30px 25px;border-radius:15px;
-      z-index:2147483647;font-family:'Rajdhani','Orbitron',sans-serif;
-      text-align:center;width:360px;max-width:90vw;
+      color:#fff;padding:clamp(22px,4vw,30px) clamp(18px,3.5vw,25px);
+      border-radius:15px;z-index:2147483647;
+      font-family:'Rajdhani','Orbitron',sans-serif;
+      text-align:center;width:min(360px,90vw);
       box-sizing:border-box;
       border:1px solid rgba(0,255,255,0.25);
       animation:border-glow 3s ease-in-out infinite,float 6s ease-in-out infinite;
@@ -277,51 +285,52 @@
                   animation:scan-line-move 4s linear infinite;pointer-events:none;"></div>
       
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-                  width:320px;height:320px;border:1px solid rgba(0,255,255,0.07);
-                  border-radius:50%;animation:pulse-ring 3.5s ease-out infinite;
-                  pointer-events:none;"></div>
+                  width:min(320px,80vw);height:min(320px,80vw);
+                  border:1px solid rgba(0,255,255,0.07);border-radius:50%;
+                  animation:pulse-ring 3.5s ease-out infinite;pointer-events:none;"></div>
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-                  width:280px;height:280px;border:1px solid rgba(102,0,255,0.06);
-                  border-radius:50%;animation:pulse-ring 3.5s ease-out 1.2s infinite;
-                  pointer-events:none;"></div>
+                  width:min(280px,70vw);height:min(280px,70vw);
+                  border:1px solid rgba(102,0,255,0.06);border-radius:50%;
+                  animation:pulse-ring 3.5s ease-out 1.2s infinite;pointer-events:none;"></div>
       
       <div style="position:relative;z-index:1;">
         <button id="music-btn" style="
-          position:absolute;top:-10px;right:-10px;
+          position:absolute;top:-8px;right:-8px;
           background:rgba(0,255,255,0.04);border:1px solid rgba(0,255,255,0.2);
-          color:#00ffff;border-radius:50%;width:32px;height:32px;
-          cursor:pointer;font-size:12px;display:flex;align-items:center;
+          color:#00ffff;border-radius:50%;width:clamp(28px,5vw,32px);height:clamp(28px,5vw,32px);
+          cursor:pointer;font-size:clamp(10px,2vw,12px);display:flex;align-items:center;
           justify-content:center;backdrop-filter:blur(10px);
           transition:all 0.3s ease;z-index:10;
           box-shadow:0 0 12px rgba(0,255,255,0.08);">♪</button>
 
-        <div style="margin-bottom:6px;">
-          <span style="font-size:8px;color:#00ffff;letter-spacing:5px;opacity:0.6;">SYS.AUTH</span>
+        <div style="margin-bottom:4px;">
+          <span style="font-size:clamp(7px,1.5vw,8px);color:#00ffff;letter-spacing:5px;opacity:0.6;">SYS.AUTH</span>
         </div>
         
         <h3 style="margin:0 0 4px 0;
                    background:linear-gradient(90deg,#00ffff,#6600ff,#ff0066);
                    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                   font-size:22px;font-weight:800;letter-spacing:3px;
+                   font-size:clamp(18px,4vw,22px);font-weight:800;letter-spacing:3px;
                    font-family:'Orbitron',sans-serif;
                    animation:title-glow 2s ease-in-out infinite;">
           A2MBD3
         </h3>
         
-        <div style="width:40px;height:1px;background:linear-gradient(90deg,transparent,#00ffff,transparent);
-                    margin:8px auto;"></div>
+        <div style="width:clamp(30px,6vw,40px);height:1px;background:linear-gradient(90deg,transparent,#00ffff,transparent);
+                    margin:clamp(6px,1.5vw,8px) auto;"></div>
         
-        <p style="margin:0 0 18px 0;color:#667788;font-size:10px;letter-spacing:3px;font-weight:500;">
+        <p style="margin:0 0 clamp(14px,3vw,18px) 0;color:#667788;
+                  font-size:clamp(9px,2vw,10px);letter-spacing:3px;font-weight:500;">
           ENTER LICENSE KEY
         </p>
 
         <div style="position:relative;">
           <input type="text" id="key-input" placeholder="XXXX-XXXX-XXXX-XXXX" style="
-            width:100%;padding:13px;margin-bottom:12px;
+            width:100%;padding:clamp(11px,2vw,13px);margin-bottom:clamp(10px,2vw,12px);
             border:1px solid rgba(0,255,255,0.25);border-radius:10px;
             background:rgba(0,0,0,0.35);color:#fff;text-align:center;
             box-sizing:border-box;font-family:'Orbitron','Rajdhani',sans-serif;
-            font-size:12px;font-weight:600;letter-spacing:2px;
+            font-size:clamp(10px,2vw,12px);font-weight:600;letter-spacing:2px;
             outline:none;backdrop-filter:blur(10px);
             transition:all 0.3s ease;text-transform:uppercase;
             box-shadow:inset 0 0 15px rgba(0,255,255,0.02);"
@@ -331,25 +340,29 @@
 
         <button id="login-btn" style="
           width:100%;background:linear-gradient(90deg,rgba(0,255,255,0.08),rgba(102,0,255,0.08));
-          color:#fff;border:1px solid rgba(0,255,255,0.35);padding:13px;
-          border-radius:10px;font-weight:700;cursor:pointer;
-          font-family:'Orbitron','Rajdhani',sans-serif;font-size:12px;
-          letter-spacing:3px;margin-bottom:10px;
-          backdrop-filter:blur(10px);
-          transition:all 0.3s ease;text-transform:uppercase;
+          color:#fff;border:1px solid rgba(0,255,255,0.35);
+          padding:clamp(11px,2vw,13px);border-radius:10px;
+          font-weight:700;cursor:pointer;
+          font-family:'Orbitron','Rajdhani',sans-serif;
+          font-size:clamp(10px,2vw,12px);letter-spacing:3px;
+          margin-bottom:clamp(8px,1.5vw,10px);
+          backdrop-filter:blur(10px);transition:all 0.3s ease;
+          text-transform:uppercase;
           box-shadow:0 0 20px rgba(0,255,255,0.08);">⬡ INITIATE EXPLOIT</button>
 
         <button id="support-btn" style="
           width:100%;background:rgba(102,0,255,0.04);color:#8899aa;
-          border:1px solid rgba(102,0,255,0.18);padding:13px;
-          border-radius:10px;font-weight:600;cursor:pointer;
-          font-family:'Orbitron','Rajdhani',sans-serif;font-size:12px;
-          letter-spacing:3px;backdrop-filter:blur(10px);
-          transition:all 0.3s ease;text-transform:uppercase;">⚡ C2 CHANNEL</button>
+          border:1px solid rgba(102,0,255,0.18);
+          padding:clamp(11px,2vw,13px);border-radius:10px;
+          font-weight:600;cursor:pointer;
+          font-family:'Orbitron','Rajdhani',sans-serif;
+          font-size:clamp(10px,2vw,12px);letter-spacing:3px;
+          backdrop-filter:blur(10px);transition:all 0.3s ease;
+          text-transform:uppercase;">⚡ C2 CHANNEL</button>
 
-        <div id="status-msg" style="margin-top:12px;font-size:9px;font-weight:600;
-                                     color:#00ffff;letter-spacing:3px;
-                                     opacity:0.7;">◆ STANDBY</div>
+        <div id="status-msg" style="margin-top:clamp(10px,2vw,12px);
+                     font-size:clamp(8px,1.5vw,9px);font-weight:600;
+                     color:#00ffff;letter-spacing:3px;opacity:0.7;">◆ STANDBY</div>
       </div>
     `;
     document.body.appendChild(authBox);
@@ -361,24 +374,6 @@
     const loginBtn = document.getElementById("login-btn");
     const supportBtn = document.getElementById("support-btn");
     const statusEl = document.getElementById("status-msg");
-
-    // Responsive handling
-    function handleResize() {
-      if (window.innerWidth < 400) {
-        authBox.style.padding = "22px 16px";
-        authBox.style.width = "94vw";
-      } else if (window.innerWidth < 600) {
-        authBox.style.padding = "26px 20px";
-        authBox.style.width = "90vw";
-        authBox.style.maxWidth = "360px";
-      } else {
-        authBox.style.padding = "30px 25px";
-        authBox.style.width = "360px";
-      }
-    }
-    
-    handleResize();
-    window.addEventListener("resize", handleResize);
 
     musicBtn.addEventListener("click", async () => {
       if (!audioPlayer) { initAudio(); musicBtn.textContent = "♪"; musicBtn.style.color = "#00ffff"; return; }
@@ -425,12 +420,12 @@
               exploitOverlay.id = "exploit-overlay";
               exploitOverlay.style.cssText = `
                 position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-                width:420px;max-width:92vw;max-height:75vh;
+                width:min(440px,93vw);max-height:78vh;
                 background:linear-gradient(160deg,rgba(5,8,22,0.98),rgba(10,15,35,0.98));
                 backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
                 border:1px solid rgba(0,255,255,0.25);border-radius:14px;
                 z-index:2147483647;font-family:'Rajdhani','Orbitron',sans-serif;
-                padding:22px;box-sizing:border-box;
+                padding:clamp(16px,3vw,22px);box-sizing:border-box;
                 box-shadow:0 0 60px rgba(0,255,255,0.12),0 0 180px rgba(102,0,255,0.08);
                 animation:border-glow 3s ease-in-out infinite;
                 overflow:hidden;
@@ -442,29 +437,33 @@
                             animation:scan-line-move 4s linear infinite;pointer-events:none;"></div>
                 
                 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-                            width:380px;height:380px;border:1px solid rgba(0,255,255,0.05);
-                            border-radius:50%;animation:pulse-ring 4s ease-out infinite;
-                            pointer-events:none;"></div>
+                            width:min(400px,85vw);height:min(400px,85vw);
+                            border:1px solid rgba(0,255,255,0.05);border-radius:50%;
+                            animation:pulse-ring 4s ease-out infinite;pointer-events:none;"></div>
                 
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;
-                            padding-bottom:10px;border-bottom:1px solid rgba(0,255,255,0.08);">
-                  <div style="width:7px;height:7px;background:#ff0066;border-radius:50%;box-shadow:0 0 6px #ff0066;"></div>
-                  <div style="width:7px;height:7px;background:#ff9900;border-radius:50%;box-shadow:0 0 6px #ff9900;"></div>
-                  <div style="width:7px;height:7px;background:#00ffff;border-radius:50%;box-shadow:0 0 6px #00ffff;"></div>
-                  <span style="color:#00ffff;font-size:9px;letter-spacing:2px;margin-left:8px;">EXPLOIT://AINCRAD</span>
-                  <span style="color:#ff0066;font-size:7px;margin-left:auto;letter-spacing:1px;animation:success-pulse 1.5s ease-in-out infinite;">● LIVE</span>
+                <div style="display:flex;align-items:center;gap:clamp(4px,1vw,6px);margin-bottom:clamp(10px,2vw,14px);
+                            padding-bottom:clamp(8px,1.5vw,10px);border-bottom:1px solid rgba(0,255,255,0.08);
+                            flex-wrap:wrap;">
+                  <div style="display:flex;gap:4px;">
+                    <div style="width:clamp(6px,1.2vw,7px);height:clamp(6px,1.2vw,7px);background:#ff0066;border-radius:50%;box-shadow:0 0 6px #ff0066;"></div>
+                    <div style="width:clamp(6px,1.2vw,7px);height:clamp(6px,1.2vw,7px);background:#ff9900;border-radius:50%;box-shadow:0 0 6px #ff9900;"></div>
+                    <div style="width:clamp(6px,1.2vw,7px);height:clamp(6px,1.2vw,7px);background:#00ffff;border-radius:50%;box-shadow:0 0 6px #00ffff;"></div>
+                  </div>
+                  <span style="color:#00ffff;font-size:clamp(8px,1.8vw,9px);letter-spacing:2px;margin-left:clamp(5px,1vw,8px);">EXPLOIT://AINCRAD</span>
+                  <span style="color:#ff0066;font-size:clamp(6px,1.2vw,7px);margin-left:auto;letter-spacing:1px;animation:success-pulse 1.5s ease-in-out infinite;">● LIVE</span>
                 </div>
 
                 <div id="log-output" style="
-                  color:#aabbcc;font-size:10px;line-height:1.9;
+                  color:#aabbcc;font-size:clamp(8px,1.8vw,10px);line-height:1.9;
                   text-align:left;font-family:'Rajdhani',sans-serif;
-                  letter-spacing:0.8px;max-height:220px;
+                  letter-spacing:0.8px;max-height:clamp(180px,40vh,280px);
                   overflow-y:auto;padding-right:4px;
                   scrollbar-width:thin;scrollbar-color:rgba(0,255,255,0.2) transparent;">
                 </div>
 
-                <div id="progress-container" style="margin-top:12px;display:none;">
-                  <div style="display:flex;justify-content:space-between;color:#00ffff;font-size:8px;margin-bottom:5px;letter-spacing:2px;">
+                <div id="progress-container" style="margin-top:clamp(10px,2vw,12px);display:none;">
+                  <div style="display:flex;justify-content:space-between;color:#00ffff;
+                              font-size:clamp(7px,1.4vw,8px);margin-bottom:5px;letter-spacing:2px;">
                     <span>PROGRESS</span>
                     <span id="progress-percent">0%</span>
                   </div>
@@ -478,20 +477,6 @@
               `;
               document.body.appendChild(exploitOverlay);
 
-              // Responsive exploit overlay
-              function handleExploitResize() {
-                if (window.innerWidth < 400) {
-                  exploitOverlay.style.padding = "18px 14px";
-                  exploitOverlay.style.width = "94vw";
-                } else if (window.innerWidth < 600) {
-                  exploitOverlay.style.padding = "20px 16px";
-                  exploitOverlay.style.width = "90vw";
-                  exploitOverlay.style.maxWidth = "420px";
-                }
-              }
-              handleExploitResize();
-              window.addEventListener("resize", handleExploitResize);
-
               const logOutput = document.getElementById("log-output");
               const progressBar = document.getElementById("progress-bar");
               const progressPercent = document.getElementById("progress-percent");
@@ -500,12 +485,11 @@
 
               setTimeout(() => {
                 progressContainer.style.display = "block";
-              }, 3000);
+              }, 4000);
 
               let logIndex = 0;
               const totalLogs = fakeLogs.length;
-              const totalDuration = 25000;
-              const avgDelay = totalDuration / totalLogs;
+              const TOTAL_DURATION = 30000;
 
               function typeNextLog() {
                 if (logIndex < fakeLogs.length) {
@@ -516,9 +500,8 @@
                     animation:log-slide-in 0.3s ease;
                     font-weight:${log.color === '#00ff88' || log.color === '#ff0066' ? '600' : '400'};
                     text-shadow:0 0 4px ${log.color};
-                    font-size:${window.innerWidth < 400 ? '9px' : '10px'};
                   `;
-                  logLine.textContent = `${log.icon} ${log.text}`;
+                  logLine.textContent = log.text;
                   logOutput.appendChild(logLine);
                   logOutput.scrollTop = logOutput.scrollHeight;
 
@@ -527,27 +510,34 @@
                   progressPercent.textContent = progress + "%";
 
                   logIndex++;
-                  const randomDelay = Math.random() * 700 + 100;
+                  const remainingLogs = totalLogs - logIndex;
+                  const remainingTime = TOTAL_DURATION - (Date.now() - startTime);
+                  const avgDelay = remainingLogs > 0 ? remainingTime / remainingLogs : 800;
+                  const randomDelay = Math.max(150, avgDelay * (0.5 + Math.random()));
+
                   setTimeout(typeNextLog, randomDelay);
                 } else {
+                  const elapsed = Date.now() - startTime;
+                  const remaining = Math.max(0, TOTAL_DURATION - elapsed);
+                  
                   setTimeout(() => {
                     const successDiv = document.createElement("div");
                     successDiv.style.cssText = `
-                      text-align:center;margin-top:18px;
+                      text-align:center;margin-top:clamp(14px,3vw,18px);
                       animation:success-pulse 2s ease-in-out infinite;
                     `;
                     successDiv.innerHTML = `
-                      <div style="font-size:35px;margin-bottom:8px;">⬡</div>
+                      <div style="font-size:clamp(30px,6vw,35px);margin-bottom:clamp(6px,1.5vw,8px);">⬡</div>
                       <div style="background:linear-gradient(90deg,#00ff88,#00ffff);
                                   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                                  font-size:16px;font-weight:800;letter-spacing:3px;
+                                  font-size:clamp(14px,3vw,16px);font-weight:800;letter-spacing:3px;
                                   font-family:'Orbitron',sans-serif;">
                         EXPLOIT SUCCESSFUL
                       </div>
-                      <div style="color:#00ffff;font-size:9px;margin-top:4px;letter-spacing:2px;">
+                      <div style="color:#00ffff;font-size:clamp(8px,1.6vw,9px);margin-top:4px;letter-spacing:2px;">
                         AINCRAD FULLY COMPROMISED
                       </div>
-                      <div style="color:#667788;font-size:8px;margin-top:6px;letter-spacing:1px;">
+                      <div style="color:#667788;font-size:clamp(7px,1.4vw,8px);margin-top:6px;letter-spacing:1px;">
                         REDIRECTING TO PANEL...
                       </div>
                     `;
@@ -568,14 +558,14 @@
                         document.getElementById("particles-container")?.remove();
                         document.getElementById("hex-grid")?.remove();
                         document.getElementById("scan-lines")?.remove();
-                        window.removeEventListener("resize", handleExploitResize);
                         window.location.replace(EMBEDDED_DATA.redirectUrl);
                       }, 500);
                     }, 2000);
-                  }, 500);
+                  }, remaining);
                 }
               }
 
+              const startTime = Date.now();
               setTimeout(typeNextLog, 1000);
             }, 300);
           }, 800);
