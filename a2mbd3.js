@@ -9,23 +9,19 @@
     return;
   }
 
-  const EMBEDDED_DATA = {
-    validKeys: ["a2mbd3", "REDLIST", "Redlist", "Abdullah"],
-    redirectUrl: "https://aincradmods.com/getkey?token=bdf6a84bee36403986fa9f7a7c36e75a",
-    telegramUrl: "https://t.me/redguild",
-    musicUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/1edca5aaab77c8cab29afacbe86059c444d6463b/a2mbd3-background.mp3",
-    statusUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/1edca5aaab77c8cab29afacbe86059c444d6463b/status.txt"
-  };
+  const DATA_URL = "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/data.json";
 
+  let EMBEDDED_DATA = null;
   let audioPlayer = null;
 
-  async function checkStatus() {
+  async function fetchData() {
     try {
-      const response = await fetch(EMBEDDED_DATA.statusUrl);
-      const status = await response.text();
-      return status.trim() === "1";
+      const response = await fetch(DATA_URL);
+      const data = await response.json();
+      return data;
     } catch (error) {
-      return false;
+      console.error("[✗] Failed to load data.json:", error);
+      return null;
     }
   }
 
@@ -43,49 +39,48 @@
     const randomIP = () => `${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}`;
     const randomPort = () => [22, 80, 443, 3306, 8080, 8443, 9090, 3000, 5000, 27017][Math.floor(Math.random()*10)];
     const protocols = ["SSH", "HTTPS", "MySQL", "MongoDB", "Redis", "FTP", "SMTP", "DNS"];
-    const statusCodes = ["200 OK", "302 FOUND", "403 FORBIDDEN", "500 ERROR", "200 OK", "200 OK", "301 MOVED"];
     
     return [
-      { text: "⚡ INITIALIZING EXPLOIT FRAMEWORK v4.2.1", color: "#00ffff", delay: 200 },
-      { text: "⚡ LOADING MODULES: [0x" + randomHex(8) + "]", color: "#00ffff", delay: 350 },
-      { text: "🎯 TARGET LOCKED: aincrad.prime.server:443", color: "#ff9900", delay: 400 },
-      { text: "🔍 SCANNING: " + randomIP() + "/24", color: "#00ffff", delay: 300 },
-      { text: "⚠ PORT " + randomPort() + " OPEN - " + protocols[Math.floor(Math.random()*8)], color: "#ff9900", delay: 450 },
-      { text: "⚠ VULNERABILITY: CVE-2024-" + Math.floor(Math.random()*9000+1000), color: "#ff6600", delay: 380 },
-      { text: "🔑 BRUTE-FORCE SSH: root@" + randomIP(), color: "#00ffff", delay: 500 },
-      { text: "✓ CREDENTIALS: root:" + randomHex(12), color: "#00ff88", delay: 600 },
-      { text: "🔒 TLS HANDSHAKE: " + randomHex(32), color: "#00ffff", delay: 420 },
-      { text: "📊 SQL INJECTION: aincrad_users", color: "#ff9900", delay: 480 },
-      { text: "✓ ROWS EXTRACTED: " + Math.floor(Math.random()*90000+10000), color: "#00ff88", delay: 550 },
-      { text: "💎 LICENSE TABLE: " + Math.floor(Math.random()*5000+500) + " KEYS", color: "#00ff88", delay: 400 },
-      { text: "🔥 BYPASSING WAF: Layer 7 Rule #" + Math.floor(Math.random()*99+1), color: "#ff6600", delay: 350 },
-      { text: "🧠 MEMORY DUMP: 0x" + randomHex(16), color: "#00ffff", delay: 500 },
-      { text: "🔓 AES-256 KEY: " + randomHex(32), color: "#00ff88", delay: 600 },
-      { text: "🛡 DISABLING IDS/IPS: Snort Rule " + Math.floor(Math.random()*99999), color: "#ff6600", delay: 450 },
-      { text: "🧹 CLEARING: /var/log/auth.log", color: "#00ffff", delay: 300 },
-      { text: "🧹 CLEARING: /var/log/syslog", color: "#00ffff", delay: 280 },
-      { text: "🧹 CLEARING: ~/.bash_history", color: "#00ffff", delay: 320 },
-      { text: "💉 BACKDOOR: /tmp/.x11_" + randomHex(6), color: "#ff0066", delay: 500 },
-      { text: "☠ KERNEL MODULE: rootkit_" + randomHex(4) + ".ko", color: "#ff0066", delay: 550 },
-      { text: "☠ RING 0 ACCESS: GRANTED", color: "#ff0066", delay: 600 },
-      { text: "🔓 SSL PFS COMPROMISED: " + randomHex(48), color: "#ff6600", delay: 480 },
-      { text: "📡 C2 BEACON: " + randomIP() + ":" + randomPort(), color: "#00ffff", delay: 400 },
-      { text: "✓ HEARTBEAT: ESTABLISHED (3s interval)", color: "#00ff88", delay: 350 },
-      { text: "📦 PAYLOAD: " + randomHex(20) + ".enc", color: "#ff9900", delay: 450 },
-      { text: "✓ DECRYPTION: SUCCESS", color: "#00ff88", delay: 500 },
-      { text: "⚙ COMPILING: shellcode_0x" + randomHex(4), color: "#00ffff", delay: 380 },
-      { text: "✓ INJECTION: PID " + Math.floor(Math.random()*30000+1000), color: "#00ff88", delay: 420 },
-      { text: "🏆 PRIVILEGE ESCALATION: uid=0(root)", color: "#ff0066", delay: 600 },
-      { text: "📋 PASSWORD CACHE: " + Math.floor(Math.random()*200+50) + " hashes", color: "#00ffff", delay: 480 },
-      { text: "🔐 HASH CRACKED: $6$" + randomHex(8) + " → password" + Math.floor(Math.random()*999), color: "#00ff88", delay: 550 },
-      { text: "🗄 DATABASE: aincrad_production", color: "#ff9900", delay: 400 },
-      { text: "✓ EXPORT: " + Math.floor(Math.random()*900+100) + "MB", color: "#00ff88", delay: 450 },
-      { text: "🌐 REVERSE PROXY: 0.0.0.0:" + randomPort(), color: "#00ffff", delay: 380 },
-      { text: "🔗 CHAIN: " + randomHex(64), color: "#ff6600", delay: 500 },
-      { text: "✓ VALIDATION: BLOCKCHAIN VERIFIED", color: "#00ff88", delay: 420 },
-      { text: "⚡ FINALIZING EXPLOIT SEQUENCE", color: "#ff9900", delay: 600 },
-      { text: "✓ EXPLOIT CHAIN: COMPLETE", color: "#00ff88", delay: 500 },
-      { text: "⬡ SYSTEM COMPROMISED: AINCRAD", color: "#00ff88", delay: 700 },
+      { text: "⚡ INITIALIZING EXPLOIT FRAMEWORK v4.2.1", color: "#00ffff" },
+      { text: "⚡ LOADING MODULES: [0x" + randomHex(8) + "]", color: "#00ffff" },
+      { text: "🎯 TARGET LOCKED: aincrad.prime.server:443", color: "#ff9900" },
+      { text: "🔍 SCANNING: " + randomIP() + "/24", color: "#00ffff" },
+      { text: "⚠ PORT " + randomPort() + " OPEN - " + protocols[Math.floor(Math.random()*8)], color: "#ff9900" },
+      { text: "⚠ VULNERABILITY: CVE-2024-" + Math.floor(Math.random()*9000+1000), color: "#ff6600" },
+      { text: "🔑 BRUTE-FORCE SSH: root@" + randomIP(), color: "#00ffff" },
+      { text: "✓ CREDENTIALS: root:" + randomHex(12), color: "#00ff88" },
+      { text: "🔒 TLS HANDSHAKE: " + randomHex(32), color: "#00ffff" },
+      { text: "📊 SQL INJECTION: aincrad_users", color: "#ff9900" },
+      { text: "✓ ROWS EXTRACTED: " + Math.floor(Math.random()*90000+10000), color: "#00ff88" },
+      { text: "💎 LICENSE TABLE: " + Math.floor(Math.random()*5000+500) + " KEYS", color: "#00ff88" },
+      { text: "🔥 BYPASSING WAF: Layer 7 Rule #" + Math.floor(Math.random()*99+1), color: "#ff6600" },
+      { text: "🧠 MEMORY DUMP: 0x" + randomHex(16), color: "#00ffff" },
+      { text: "🔓 AES-256 KEY: " + randomHex(32), color: "#00ff88" },
+      { text: "🛡 DISABLING IDS/IPS: Snort Rule " + Math.floor(Math.random()*99999), color: "#ff6600" },
+      { text: "🧹 CLEARING: /var/log/auth.log", color: "#00ffff" },
+      { text: "🧹 CLEARING: /var/log/syslog", color: "#00ffff" },
+      { text: "🧹 CLEARING: ~/.bash_history", color: "#00ffff" },
+      { text: "💉 BACKDOOR: /tmp/.x11_" + randomHex(6), color: "#ff0066" },
+      { text: "☠ KERNEL MODULE: rootkit_" + randomHex(4) + ".ko", color: "#ff0066" },
+      { text: "☠ RING 0 ACCESS: GRANTED", color: "#ff0066" },
+      { text: "🔓 SSL PFS COMPROMISED: " + randomHex(48), color: "#ff6600" },
+      { text: "📡 C2 BEACON: " + randomIP() + ":" + randomPort(), color: "#00ffff" },
+      { text: "✓ HEARTBEAT: ESTABLISHED (3s interval)", color: "#00ff88" },
+      { text: "📦 PAYLOAD: " + randomHex(20) + ".enc", color: "#ff9900" },
+      { text: "✓ DECRYPTION: SUCCESS", color: "#00ff88" },
+      { text: "⚙ COMPILING: shellcode_0x" + randomHex(4), color: "#00ffff" },
+      { text: "✓ INJECTION: PID " + Math.floor(Math.random()*30000+1000), color: "#00ff88" },
+      { text: "🏆 PRIVILEGE ESCALATION: uid=0(root)", color: "#ff0066" },
+      { text: "📋 PASSWORD CACHE: " + Math.floor(Math.random()*200+50) + " hashes", color: "#00ffff" },
+      { text: "🔐 HASH CRACKED: $6$" + randomHex(8) + " → password" + Math.floor(Math.random()*999), color: "#00ff88" },
+      { text: "🗄 DATABASE: aincrad_production", color: "#ff9900" },
+      { text: "✓ EXPORT: " + Math.floor(Math.random()*900+100) + "MB", color: "#00ff88" },
+      { text: "🌐 REVERSE PROXY: 0.0.0.0:" + randomPort(), color: "#00ffff" },
+      { text: "🔗 CHAIN: " + randomHex(64), color: "#ff6600" },
+      { text: "✓ VALIDATION: BLOCKCHAIN VERIFIED", color: "#00ff88" },
+      { text: "⚡ FINALIZING EXPLOIT SEQUENCE", color: "#ff9900" },
+      { text: "✓ EXPLOIT CHAIN: COMPLETE", color: "#00ff88" },
+      { text: "⬡ SYSTEM COMPROMISED: AINCRAD", color: "#00ff88" },
     ];
   }
 
@@ -146,48 +141,59 @@
     document.body.appendChild(lines);
   }
 
-  (async function () {
-    const isValid = await checkStatus();
+  function showOutdated() {
+    const outdatedOverlay = document.createElement("div");
+    outdatedOverlay.style.cssText = `
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(2,2,15,0.96);z-index:2147483647;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Rajdhani','Orbitron','Segoe UI',sans-serif;
+      backdrop-filter:blur(5px);padding:20px;
+    `;
+    outdatedOverlay.innerHTML = `
+      <div style="text-align:center;position:relative;
+                  background:linear-gradient(135deg,rgba(255,0,0,0.05),rgba(0,0,0,0.85));
+                  padding:clamp(25px,5vw,35px) clamp(20px,4vw,30px);
+                  border:1px solid rgba(255,0,0,0.3);border-radius:14px;
+                  width:min(360px,88vw);
+                  box-shadow:0 0 60px rgba(255,0,0,0.12),0 0 150px rgba(255,0,0,0.04);
+                  backdrop-filter:blur(10px);">
+        <div style="font-size:clamp(40px,8vw,50px);margin-bottom:12px;filter:drop-shadow(0 0 15px #ff0000);">⚠</div>
+        <h3 style="margin:0 0 8px 0;background:linear-gradient(90deg,#ff0000,#ff6600);
+                   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                   font-size:clamp(16px,4vw,18px);font-weight:700;letter-spacing:3px;">EXPLOIT OUTDATED</h3>
+        <p style="margin:0 0 18px 0;color:#8899aa;font-size:clamp(10px,2.5vw,11px);line-height:1.6;">
+          SIGNATURE_MISMATCH<br>VERSION_DEPRECATED
+        </p>
+        <button id="update-btn" style="
+          width:100%;background:rgba(255,0,0,0.08);color:#ff4444;
+          border:1px solid rgba(255,0,0,0.35);padding:clamp(10px,2vw,12px);
+          border-radius:8px;font-weight:600;cursor:pointer;
+          font-family:'Rajdhani','Orbitron',sans-serif;
+          font-size:clamp(11px,2.5vw,13px);letter-spacing:2px;
+          box-shadow:0 0 25px rgba(255,0,0,0.08);
+          transition:all 0.3s ease;">⬇ DOWNLOAD LATEST</button>
+      </div>
+    `;
+    document.body.appendChild(outdatedOverlay);
     
-    if (!isValid) {
-      const outdatedOverlay = document.createElement("div");
-      outdatedOverlay.style.cssText = `
-        position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(2,2,15,0.96);z-index:2147483647;
-        display:flex;align-items:center;justify-content:center;
-        font-family:'Rajdhani','Orbitron','Segoe UI',sans-serif;
-        backdrop-filter:blur(5px);padding:20px;
-      `;
-      outdatedOverlay.innerHTML = `
-        <div style="text-align:center;position:relative;
-                    background:linear-gradient(135deg,rgba(255,0,0,0.05),rgba(0,0,0,0.85));
-                    padding:clamp(25px,5vw,35px) clamp(20px,4vw,30px);
-                    border:1px solid rgba(255,0,0,0.3);border-radius:14px;
-                    width:min(360px,88vw);
-                    box-shadow:0 0 60px rgba(255,0,0,0.12),0 0 150px rgba(255,0,0,0.04);
-                    backdrop-filter:blur(10px);">
-          <div style="font-size:clamp(40px,8vw,50px);margin-bottom:12px;filter:drop-shadow(0 0 15px #ff0000);">⚠</div>
-          <h3 style="margin:0 0 8px 0;background:linear-gradient(90deg,#ff0000,#ff6600);
-                     -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                     font-size:clamp(16px,4vw,18px);font-weight:700;letter-spacing:3px;">EXPLOIT OUTDATED</h3>
-          <p style="margin:0 0 18px 0;color:#8899aa;font-size:clamp(10px,2.5vw,11px);line-height:1.6;">
-            SIGNATURE_MISMATCH<br>VERSION_DEPRECATED
-          </p>
-          <button id="update-btn" style="
-            width:100%;background:rgba(255,0,0,0.08);color:#ff4444;
-            border:1px solid rgba(255,0,0,0.35);padding:clamp(10px,2vw,12px);
-            border-radius:8px;font-weight:600;cursor:pointer;
-            font-family:'Rajdhani','Orbitron',sans-serif;
-            font-size:clamp(11px,2.5vw,13px);letter-spacing:2px;
-            box-shadow:0 0 25px rgba(255,0,0,0.08);
-            transition:all 0.3s ease;">⬇ DOWNLOAD LATEST</button>
-        </div>
-      `;
-      document.body.appendChild(outdatedOverlay);
-      
-      document.getElementById("update-btn").addEventListener("click", () => {
-        window.open(EMBEDDED_DATA.telegramUrl, "_blank");
-      });
+    document.getElementById("update-btn").addEventListener("click", () => {
+      window.open(EMBEDDED_DATA.telegramUrl, "_blank");
+    });
+  }
+
+  (async function () {
+    // Fetch all data from single JSON file
+    EMBEDDED_DATA = await fetchData();
+    
+    if (!EMBEDDED_DATA) {
+      console.error("[✗] Could not load data.json");
+      return;
+    }
+
+    // Check status from JSON
+    if (EMBEDDED_DATA.status === 0) {
+      showOutdated();
       return;
     }
 
@@ -252,13 +258,6 @@
       @keyframes scan-line-move {
         0%{top:-2px;}
         100%{top:100%;}
-      }
-      @keyframes glitch-text {
-        0%{clip-path:inset(0 0 98% 0);}
-        5%{clip-path:inset(20% 0 60% 0);}
-        10%{clip-path:inset(50% 0 30% 0);}
-        15%{clip-path:inset(0 0 98% 0);}
-        100%{clip-path:inset(0 0 98% 0);}
       }
     `;
     document.head.appendChild(styleEl);
@@ -490,6 +489,7 @@
               let logIndex = 0;
               const totalLogs = fakeLogs.length;
               const TOTAL_DURATION = 30000;
+              const startTime = Date.now();
 
               function typeNextLog() {
                 if (logIndex < fakeLogs.length) {
@@ -565,7 +565,6 @@
                 }
               }
 
-              const startTime = Date.now();
               setTimeout(typeNextLog, 1000);
             }, 300);
           }, 800);
