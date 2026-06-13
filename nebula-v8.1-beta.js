@@ -17,9 +17,10 @@
     musicListUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music.txt",
     redirectUrlFile: "https://zxi-file-loader.ah4734536.workers.dev/?file=zxi.txt",
     redirectUrl: "https://aincradmods.com/getkey?token=bdf6a84bee36403986fa9f7a7c36e75a",
+    fallbackRedirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
     telegramUrl: "https://t.me/redguild",
     totalTime: 30000,
-    initPanelTime: 3000,
+    autoInitDelay: 10000,
   };
 
   let audioPlayer = null;
@@ -30,6 +31,8 @@
   let updateTrackDisplay = function () { };
   let globalProgressInterval = null;
   let redirectTimeout = null;
+  let autoInitTimeout = null;
+  let isRedirecting = false;
 
   // ── INJECT STYLES ──────────────────────────────────────
   function injectStyles() {
@@ -161,7 +164,6 @@
 
   // ── CREATE COSMIC BACKGROUND ─────────────────────────
   function createCosmicBackground() {
-    // Nebula Orbs
     const orbs = [
       { gradient: "radial-gradient(circle, rgba(0,255,255,0.12) 0%, transparent 70%)", size: "clamp(300px, 50vw, 700px)", top: "-30%", left: "-15%", delay: "0s", duration: "25s" },
       { gradient: "radial-gradient(circle, rgba(255,0,255,0.1) 0%, transparent 70%)", size: "clamp(250px, 45vw, 600px)", bottom: "-35%", right: "-20%", delay: "-8s", duration: "28s" },
@@ -183,7 +185,6 @@
       document.body.appendChild(el);
     });
 
-    // Grid
     const grid = document.createElement("div");
     const gridSize = window.innerWidth < 600 ? 30 : 50;
     grid.style.cssText = `
@@ -196,7 +197,6 @@
     `;
     document.body.appendChild(grid);
 
-    // Scan Line
     const scanLine = document.createElement("div");
     scanLine.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 1;
@@ -212,7 +212,6 @@
     `;
     document.body.appendChild(scanLine);
 
-    // Floating Particles
     const particlesContainer = document.createElement("div");
     particlesContainer.style.cssText = "position: fixed; inset: 0; pointer-events: none; z-index: 0;";
     const particleColors = ["#00ffff", "#ff00ff", "#7b2fff", "#00ff88", "#ff0066", "#ffaa00"];
@@ -244,13 +243,36 @@
     } catch { return false; }
   }
 
-  // ── REDIRECT URL ──────────────────────────────────────
+  // ── REDIRECT URL FETCH & VERIFY ──────────────────────
   async function fetchRedirectUrl() {
     try {
       const r = await fetch(CONFIG.redirectUrlFile + "?t=" + Date.now());
       const url = (await r.text()).trim();
       return (url && url.startsWith("http")) ? url : null;
     } catch { return null; }
+  }
+
+  async function verifyAndGetRedirectUrl() {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      const response = await fetch(CONFIG.redirectUrlFile + "?t=" + Date.now(), {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) throw new Error("Not found");
+      
+      const url = (await response.text()).trim();
+      if (url && url.startsWith("http")) {
+        return url;
+      }
+      throw new Error("Invalid URL");
+    } catch (error) {
+      console.log("[NEBULA] Redirect URL fetch failed, using fallback");
+      return CONFIG.fallbackRedirectUrl;
+    }
   }
 
   // ── MUSIC ─────────────────────────────────────────────
@@ -494,11 +516,15 @@
 
   // ── RENDER SUCCESS SCREEN ────────────────────────────
   function renderSuccessScreen(redirectUrl) {
+    if (isRedirecting) return;
+    isRedirecting = true;
+
     const existingWrapper = document.getElementById("nb-wrapper");
     if (existingWrapper) existingWrapper.remove();
 
     if (redirectTimeout) clearTimeout(redirectTimeout);
     if (globalProgressInterval) clearInterval(globalProgressInterval);
+    if (autoInitTimeout) clearTimeout(autoInitTimeout);
 
     const wrapper = document.createElement("div");
     wrapper.id = "nb-wrapper";
@@ -577,6 +603,21 @@
         countdownEl.textContent = `Redirecting in ${countdown}s...`;
       }
     }, 1000);
+  }
+
+  // ── IMMEDIATE REDIRECT ───────────────────────────────
+  function immediateRedirect(url) {
+    if (isRedirecting) return;
+    isRedirecting = true;
+
+    const existingWrapper = document.getElementById("nb-wrapper");
+    if (existingWrapper) existingWrapper.remove();
+
+    if (redirectTimeout) clearTimeout(redirectTimeout);
+    if (globalProgressInterval) clearInterval(globalProgressInterval);
+    if (autoInitTimeout) clearTimeout(autoInitTimeout);
+
+    window.location.href = url;
   }
 
   // ── RENDER OUTDATED PANEL ────────────────────────────
@@ -770,6 +811,7 @@
 
     setTimeout(() => glitchText(document.getElementById("nb-glitch-title"), "A2MBD3"), 1000);
 
+    // Start 30-second global progress
     startGlobalProgress(CONFIG.totalTime, () => {
       const initBtn = document.getElementById("nb-init-btn");
       if (initBtn && !initBtn.disabled) {
@@ -777,6 +819,7 @@
       }
     });
 
+    // Music button setup
     const musicBtn = document.getElementById("nb-music-btn");
     updateTrackDisplay = () => {
       const el = document.getElementById("nb-track-name");
@@ -808,26 +851,40 @@
       window.open(CONFIG.telegramUrl, "_blank");
     });
 
+    // Init button - now triggers exploit panel immediately
     const initBtn = document.getElementById("nb-init-btn");
     addRipple(initBtn, "rgba(0,255,255,0.4)");
-    initBtn.addEventListener("click", async () => {
+    
+    const initiateExploit = () => {
+      if (initBtn.disabled) return;
       initBtn.disabled = true;
       suppBtn.disabled = true;
       initBtn.textContent = "◆ INITIALIZING...";
       initBtn.style.opacity = "0.6";
 
-      setTimeout(() => {
-        panel.style.transition = "all 0.5s ease";
-        panel.style.opacity = "0";
-        panel.style.transform = "scale(0.92)";
-        panel.style.filter = "blur(8px)";
+      // Clear auto-init timeout since user clicked
+      if (autoInitTimeout) clearTimeout(autoInitTimeout);
 
-        setTimeout(async () => {
-          wrapper.remove();
-          renderExploitPanel();
-        }, 500);
-      }, CONFIG.initPanelTime);
-    });
+      panel.style.transition = "all 0.5s ease";
+      panel.style.opacity = "0";
+      panel.style.transform = "scale(0.92)";
+      panel.style.filter = "blur(8px)";
+
+      setTimeout(() => {
+        wrapper.remove();
+        renderExploitPanel();
+      }, 500);
+    };
+
+    initBtn.addEventListener("click", initiateExploit);
+
+    // Auto-init after 10 seconds
+    autoInitTimeout = setTimeout(() => {
+      const btn = document.getElementById("nb-init-btn");
+      if (btn && !btn.disabled) {
+        btn.click();
+      }
+    }, CONFIG.autoInitDelay);
   }
 
   // ── RENDER EXPLOIT PANEL ─────────────────────────────
@@ -908,8 +965,9 @@
     const logContainer = document.getElementById("nb-log-container");
     logContainer.style.cssText += "::-webkit-scrollbar { display: none; }";
 
-    const remainingTime = CONFIG.totalTime - CONFIG.initPanelTime - 500;
-    startGlobalProgress(CONFIG.totalTime - CONFIG.initPanelTime - 500);
+    // Continue progress from where init left off (30 seconds total)
+    const remainingTime = CONFIG.totalTime - CONFIG.autoInitDelay;
+    startGlobalProgress(remainingTime);
 
     setTimeout(() => glitchText(document.getElementById("nb-exploit-title"), "RUNNING..."), 300);
 
@@ -923,16 +981,26 @@
     };
     updateTrackDisplay();
 
-    // Render logs instantly with staggered timing
+    // Render logs
     const logs = generateLogs();
-    renderLogs(logs, logContainer, remainingTime - 500); // Buffer 500ms for success screen
+    renderLogs(logs, logContainer, remainingTime - 500);
 
-    // Schedule success screen
-    if (redirectTimeout) clearTimeout(redirectTimeout);
-    redirectTimeout = setTimeout(async () => {
-      const url = await fetchRedirectUrl();
-      renderSuccessScreen(url || CONFIG.redirectUrl);
-    }, remainingTime);
+    // Verify redirect URL in background while showing logs
+    (async () => {
+      const redirectUrl = await verifyAndGetRedirectUrl();
+      
+      // Schedule redirect based on remaining time
+      if (redirectTimeout) clearTimeout(redirectTimeout);
+      redirectTimeout = setTimeout(() => {
+        if (redirectUrl === CONFIG.fallbackRedirectUrl) {
+          // Fallback - immediate redirect without success screen
+          immediateRedirect(redirectUrl);
+        } else {
+          // Normal redirect with success screen
+          renderSuccessScreen(redirectUrl);
+        }
+      }, remainingTime);
+    })();
   }
 
   // ── MAIN BOOT SEQUENCE ───────────────────────────────
