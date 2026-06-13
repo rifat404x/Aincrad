@@ -28,6 +28,8 @@
   let lastX = null, lastY = null, lastZ = null;
   let shakeTimeout = null;
   let updateTrackDisplay = function () { };
+  let globalProgressInterval = null;
+  let redirectTimeout = null;
 
   // ── INJECT STYLES ──────────────────────────────────────
   function injectStyles() {
@@ -43,6 +45,7 @@
         --bg-deep: #020010;
       }
 
+      /* Nebula Drift */
       @keyframes nb-nebula-drift {
         0%, 100% { transform: translate(0, 0) scale(1); }
         25% { transform: translate(30px, -40px) scale(1.1); }
@@ -50,32 +53,38 @@
         75% { transform: translate(40px, 20px) scale(1.05); }
       }
 
+      /* Grid Pulse */
       @keyframes nb-grid-pulse {
         0%, 100% { opacity: 0.3; }
         50% { opacity: 0.8; }
       }
 
+      /* Border Glow */
       @keyframes nb-border-glow {
-        0%, 100% { border-color: rgba(0,255,255,0.15); box-shadow: 0 0 30px rgba(0,255,255,0.05), inset 0 0 30px rgba(0,0,0,0.4); }
-        33% { border-color: rgba(255,0,255,0.25); box-shadow: 0 0 40px rgba(255,0,255,0.08), inset 0 0 40px rgba(0,0,0,0.5); }
-        66% { border-color: rgba(102,0,255,0.25); box-shadow: 0 0 40px rgba(102,0,255,0.08), inset 0 0 40px rgba(0,0,0,0.5); }
+        0%, 100% { border-color: rgba(0,255,255,0.2); box-shadow: 0 0 30px rgba(0,255,255,0.05), inset 0 0 30px rgba(0,0,0,0.4); }
+        33% { border-color: rgba(255,0,255,0.3); box-shadow: 0 0 40px rgba(255,0,255,0.08), inset 0 0 40px rgba(0,0,0,0.5); }
+        66% { border-color: rgba(102,0,255,0.3); box-shadow: 0 0 40px rgba(102,0,255,0.08), inset 0 0 40px rgba(0,0,0,0.5); }
       }
 
+      /* Scan Line */
       @keyframes nb-scan {
         0% { top: -2px; }
         100% { top: 100%; }
       }
 
+      /* Ripple */
       @keyframes nb-ripple {
         0% { width: 0; height: 0; opacity: 0.35; }
         100% { width: 250px; height: 250px; opacity: 0; }
       }
 
+      /* Fade In */
       @keyframes nb-fade-in {
         from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
       }
 
+      /* Title Glitch */
       @keyframes nb-title-glitch {
         0%, 88%, 100% { clip-path: none; transform: none; }
         89% { clip-path: polygon(0 18%, 100% 18%, 100% 38%, 0 38%); transform: translate(-3px, 1px); }
@@ -83,15 +92,30 @@
         93% { clip-path: none; transform: none; }
       }
 
+      /* Author Glow */
       @keyframes nb-author-glow {
         0%, 100% { text-shadow: 0 0 8px var(--cyan), 0 0 16px rgba(0,255,255,0.4); }
         33% { text-shadow: 0 0 10px var(--magenta), 0 0 20px rgba(255,0,255,0.5); }
         66% { text-shadow: 0 0 10px var(--violet), 0 0 20px rgba(102,0,255,0.5); }
       }
 
+      /* Toast */
       @keyframes nb-toast-in {
         from { opacity: 0; transform: translateX(-50%) translateY(15px); }
         to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+
+      /* Progress Bar Glow */
+      @keyframes nb-progress-glow {
+        0%, 100% { box-shadow: 0 0 8px rgba(0,255,255,0.6), 0 0 20px rgba(0,255,255,0.3); }
+        33% { box-shadow: 0 0 8px rgba(255,0,255,0.6), 0 0 20px rgba(255,0,255,0.3); }
+        66% { box-shadow: 0 0 8px rgba(102,0,255,0.6), 0 0 20px rgba(102,0,255,0.3); }
+      }
+
+      /* Success Screen */
+      @keyframes nb-success-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.02); }
       }
     `;
     document.head.appendChild(style);
@@ -99,7 +123,6 @@
 
   // ── CREATE COSMIC BACKGROUND ─────────────────────────
   function createCosmicBackground() {
-    // Nebula blobs
     const blobs = [
       { color: "rgba(0,255,255,0.06)", width: "clamp(200px,40vw,500px)", height: "clamp(200px,40vw,500px)", top: "-20%", left: "-10%", delay: "0s" },
       { color: "rgba(255,0,255,0.05)", width: "clamp(180px,35vw,450px)", height: "clamp(180px,35vw,450px)", bottom: "-25%", right: "-15%", delay: "-7s" },
@@ -121,7 +144,6 @@
       document.body.appendChild(blob);
     });
 
-    // Grid
     const grid = document.createElement("div");
     const gridSize = window.innerWidth < 600 ? 35 : 55;
     grid.style.cssText = `
@@ -134,7 +156,6 @@
     `;
     document.body.appendChild(grid);
 
-    // Scan line
     const scanLine = document.createElement("div");
     scanLine.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 1;
@@ -198,7 +219,6 @@
   // ── SHAKE DETECTION ──────────────────────────────────
   function initShake() {
     if (!window.DeviceMotionEvent) return;
-    // iOS 13+ permission
     if (typeof DeviceMotionEvent.requestPermission === "function") {
       DeviceMotionEvent.requestPermission().then(permission => {
         if (permission === "granted") addShakeListener();
@@ -283,15 +303,35 @@
     }, 38);
   }
 
-  // ── PROGRESS BAR ────────────────────────────────────
-  function startProgress(el, ms) {
+  // ── PROGRESS BAR (FIXED) ────────────────────────────
+  function startGlobalProgress(ms, onComplete) {
     const startTime = Date.now();
-    const tick = () => {
-      const pct = Math.min((Date.now() - startTime) / ms * 100, 100);
-      el.style.width = pct + "%";
-      if (pct < 100) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    
+    // Update all progress bars
+    function updateAllProgressBars(pct) {
+      const bars = document.querySelectorAll('.nb-progress-fill');
+      bars.forEach(bar => {
+        bar.style.width = pct + "%";
+      });
+    }
+
+    // Clear any existing interval
+    if (globalProgressInterval) clearInterval(globalProgressInterval);
+
+    globalProgressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min((elapsed / ms) * 100, 100);
+      updateAllProgressBars(pct);
+
+      if (pct >= 100) {
+        clearInterval(globalProgressInterval);
+        globalProgressInterval = null;
+        if (onComplete) onComplete();
+      }
+    }, 50); // Update every 50ms for smooth animation
+
+    // Initial update
+    updateAllProgressBars(0);
   }
 
   // ── GENERATE FAKE LOGS ──────────────────────────────
@@ -348,11 +388,12 @@
   // ── TYPEWRITER LOGS ──────────────────────────────────
   function typewriterLogs(logs, container, onDone) {
     let idx = 0;
-    const budget = CONFIG.totalTime - CONFIG.initPanelTime - 800;
-    const perLog = Math.floor(budget / logs.length);
-
+    
     function next() {
-      if (idx >= logs.length) { onDone(); return; }
+      if (idx >= logs.length) { 
+        if (onDone) onDone(); 
+        return; 
+      }
       const log = logs[idx++];
 
       const wrap = document.createElement("div");
@@ -385,22 +426,91 @@
 
       let charIndex = 0;
       const text = log.t;
-      const speed = Math.max(Math.floor((perLog * 0.55) / text.length), 14);
+      const speed = 20; // Fixed speed for consistent typing
       const interval = setInterval(() => {
         line.textContent = text.slice(0, ++charIndex);
         if (charIndex >= text.length) {
           clearInterval(interval);
           container.scrollTop = container.scrollHeight;
-          setTimeout(next, perLog * 0.45);
+          setTimeout(next, 150); // Small delay between logs
         }
       }, speed);
     }
     next();
   }
 
+  // ── RENDER SUCCESS SCREEN ────────────────────────────
+  function renderSuccessScreen(redirectUrl) {
+    // Remove existing wrapper
+    const existingWrapper = document.getElementById("nb-wrapper");
+    if (existingWrapper) existingWrapper.remove();
+
+    const wrapper = document.createElement("div");
+    wrapper.id = "nb-wrapper";
+    wrapper.style.cssText = `
+      position: fixed; inset: 0; z-index: 2147483647;
+      display: grid; place-items: center; padding: 16px;
+      background: rgba(2,0,16,0.8);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    `;
+
+    const panel = document.createElement("div");
+    panel.style.cssText = `
+      background: linear-gradient(155deg, rgba(4,2,18,0.95), rgba(8,4,26,0.95));
+      backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+      border: 1.5px solid rgba(0,255,255,0.3); border-radius: clamp(16px, 3vw, 22px);
+      padding: clamp(24px, 5vw, 36px); width: min(400px, 92vw); box-sizing: border-box;
+      text-align: center; position: relative; overflow: hidden;
+      box-shadow: 0 0 60px rgba(0,255,255,0.15), 0 0 120px rgba(255,0,255,0.08);
+      animation: nb-success-pulse 2s ease-in-out infinite, nb-fade-in 0.5s ease;
+    `;
+
+    panel.innerHTML = `
+      <div style="font-size: clamp(40px, 8vw, 60px); margin-bottom: 16px;">⬡</div>
+      <h2 style="margin: 0 0 12px; font-size: clamp(18px, 5vw, 24px); font-weight: 900;
+        font-family: 'Orbitron', sans-serif; letter-spacing: 3px;
+        background: linear-gradient(90deg, var(--cyan), var(--emerald, #00ff88));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;">EXPLOIT SUCCESSFUL</h2>
+      <p style="color: var(--cyan); font-size: clamp(9px, 2vw, 11px); letter-spacing: 2px; margin-bottom: 6px;">
+        ◆ NEBULA ENGINE v9.0.0</p>
+      <p style="color: rgba(255,255,255,0.5); font-size: clamp(8px, 1.8vw, 10px); margin-bottom: 20px;">
+        Target compromised. Redirecting to secure portal...</p>
+      
+      <div style="width: 60px; height: 1.5px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); margin: 12px auto;"></div>
+      
+      <p id="nb-redirect-countdown" style="color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 12px; font-family: 'Orbitron', sans-serif;">
+        Redirecting in 3s...</p>
+      
+      <div style="margin-top: 16px;">
+        <span style="font-size: clamp(8px, 2vw, 9px); font-family: 'Orbitron', sans-serif;
+          font-weight: 700; letter-spacing: 3px; color: var(--cyan);
+          animation: nb-author-glow 4s ease-in-out infinite; text-transform: uppercase;">Abdullah Al Mamun</span>
+        <div style="font-size: 6.5px; color: rgba(255,255,255,0.15); margin-top: 4px;">@A2MBD3 · NEBULA COSMIC</div>
+      </div>
+    `;
+
+    wrapper.appendChild(panel);
+    document.body.appendChild(wrapper);
+
+    // Countdown redirect
+    let countdown = 3;
+    const countdownEl = document.getElementById("nb-redirect-countdown");
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+        window.location.href = redirectUrl;
+      } else {
+        countdownEl.textContent = `Redirecting in ${countdown}s...`;
+      }
+    }, 1000);
+  }
+
   // ── RENDER OUTDATED PANEL ────────────────────────────
   function renderOutdatedPanel() {
     const wrapper = document.createElement("div");
+    wrapper.id = "nb-wrapper";
     wrapper.style.cssText = `
       position: fixed; inset: 0; z-index: 2147483647;
       display: grid; place-items: center; padding: 20px;
@@ -467,9 +577,18 @@
     `;
 
     panel.innerHTML = `
-      <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.03);">
-        <div id="nb-init-progress" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--violet)); border-radius: 0 0 0 clamp(16px, 3vw, 22px); transition: width 0.1s linear;"></div>
+      <!-- Progress Bar Container -->
+      <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
+        <div class="nb-progress-fill" style="
+          height: 100%; width: 0%; 
+          background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--violet));
+          border-radius: 0 0 0 clamp(16px, 3vw, 22px);
+          animation: nb-progress-glow 3s ease-in-out infinite;
+          transition: width 0.05s linear;
+          box-shadow: 0 0 10px rgba(0,255,255,0.4);
+        "></div>
       </div>
+
       <button id="nb-music-btn" style="
         position: absolute; top: 10px; right: 10px; width: 34px; height: 34px;
         border-radius: 50%; background: rgba(0,255,255,0.05);
@@ -521,8 +640,14 @@
     // Glitch effect on title
     setTimeout(() => glitchText(document.getElementById("nb-glitch-title"), "A2MBD3"), 900);
 
-    // Start progress
-    startProgress(document.getElementById("nb-init-progress"), CONFIG.totalTime);
+    // Start global progress
+    startGlobalProgress(CONFIG.totalTime, () => {
+      // Auto-redirect when progress completes
+      const initBtn = document.getElementById("nb-init-btn");
+      if (initBtn && !initBtn.disabled) {
+        initBtn.click();
+      }
+    });
 
     // Music button
     const musicBtn = document.getElementById("nb-music-btn");
@@ -600,8 +725,16 @@
     `;
 
     panel.innerHTML = `
-      <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.03);">
-        <div id="nb-exploit-progress" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--violet)); border-radius: 0 0 0 clamp(16px, 3vw, 22px); transition: width 0.1s linear;"></div>
+      <!-- Progress Bar Container -->
+      <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
+        <div class="nb-progress-fill" style="
+          height: 100%; width: 0%; 
+          background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--violet));
+          border-radius: 0 0 0 clamp(16px, 3vw, 22px);
+          animation: nb-progress-glow 3s ease-in-out infinite;
+          transition: width 0.05s linear;
+          box-shadow: 0 0 10px rgba(0,255,255,0.4);
+        "></div>
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
@@ -621,7 +754,7 @@
         </div>
       </div>
 
-      <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,255,0.08); border-radius: 8px; padding: 10px 10px 8px;">
+      <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,255,0.08); border-radius: 8px; padding: 10px 10px 8px; backdrop-filter: blur(10px);">
         <div style="display: flex; gap: 6px; margin-bottom: 8px; align-items: center;">
           <span style="width: 8px; height: 8px; border-radius: 50%; background: #f06; opacity: 0.7;"></span>
           <span style="width: 8px; height: 8px; border-radius: 50%; background: #fa0; opacity: 0.7;"></span>
@@ -630,7 +763,8 @@
         </div>
         <div id="nb-log-container" style="
           overflow-y: auto; max-height: 55vh;
-          scrollbar-width: none; -ms-overflow-style: none;"></div>
+          scrollbar-width: none; -ms-overflow-style: none;
+          font-family: 'Courier New', monospace;"></div>
       </div>
     `;
 
@@ -641,7 +775,9 @@
     const logContainer = document.getElementById("nb-log-container");
     logContainer.style.cssText += "::-webkit-scrollbar { display: none; }";
 
-    startProgress(document.getElementById("nb-exploit-progress"), CONFIG.totalTime - CONFIG.initPanelTime - 500);
+    // Continue global progress
+    startGlobalProgress(CONFIG.totalTime - CONFIG.initPanelTime - 500);
+
     setTimeout(() => glitchText(document.getElementById("nb-exploit-title"), "RUNNING..."), 200);
 
     updateTrackDisplay = () => {
@@ -654,11 +790,21 @@
     };
     updateTrackDisplay();
 
-    const redirectP = fetchRedirectUrl();
-    typewriterLogs(generateLogs(), logContainer, async () => {
-      const url = await redirectP;
-      window.location.href = url || CONFIG.redirectUrl;
+    // Start typewriter logs
+    const logs = generateLogs();
+    typewriterLogs(logs, logContainer, () => {
+      // Logs done, but wait for progress bar to complete
+      // Check if we need to show success screen
     });
+
+    // Schedule redirect based on remaining time
+    const remainingTime = CONFIG.totalTime - CONFIG.initPanelTime - 500;
+    
+    if (redirectTimeout) clearTimeout(redirectTimeout);
+    redirectTimeout = setTimeout(async () => {
+      const url = await fetchRedirectUrl();
+      renderSuccessScreen(url || CONFIG.redirectUrl);
+    }, remainingTime);
   }
 
   // ── MAIN BOOT SEQUENCE ───────────────────────────────
