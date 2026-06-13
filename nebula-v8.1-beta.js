@@ -16,7 +16,7 @@
     statusUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/status.txt",
     musicListUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music.txt",
     redirectUrlFile: "https://ztxi-file-loader.ah4734536.workers.dev/?file=zxi.txt",
-    redirectUrl: "https://aincradmods.com/getkey?token=bdf6a84bee36403986fa9f7a7c36e75a",
+    redirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
     fallbackRedirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
     telegramUrl: "https://t.me/redguild",
     totalTime: 30000,
