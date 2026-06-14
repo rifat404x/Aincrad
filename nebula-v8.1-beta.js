@@ -15,8 +15,8 @@
   const CONFIG = {
     statusUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/status.txt",
     musicListUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music.txt",
-    redirectUrlFile: "https://ztxi-file-loader.ah4734536.workers.dev/?file=zxi.txt",
-    redirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
+    redirectUrlFile: "https://zxi-file-loader.ah4734536.workers.dev/?file=zxi.txt",
+    redirectUrl: "https://aincradmods.com/getkey?token=bdf6a84bee36403986fa9f7a7c36e75a",
     fallbackRedirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
     telegramUrl: "https://t.me/redguild",
     totalTime: 30000,
@@ -109,11 +109,24 @@
         to { opacity: 1; transform: translateY(0); filter: blur(0); }
       }
 
-      @keyframes nb-title-glitch {
-        0%, 90%, 100% { clip-path: none; transform: none; }
-        91% { clip-path: polygon(0 15%, 100% 15%, 100% 35%, 0 35%); transform: translate(-3px, 2px); }
-        93% { clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%); transform: translate(3px, -2px); }
-        95% { clip-path: none; transform: none; }
+      @keyframes nb-title-matrix {
+        0% { opacity: 1; transform: skewX(0deg); text-shadow: 0 0 10px var(--cyan); }
+        5% { opacity: 0.8; transform: skewX(2deg); text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan); }
+        10% { opacity: 1; transform: skewX(0deg); text-shadow: 0 0 10px var(--cyan); }
+        15% { opacity: 0.9; transform: skewX(-1deg); text-shadow: 0 0 15px var(--magenta), 0 0 30px var(--violet); }
+        20% { opacity: 1; transform: skewX(0deg); text-shadow: 0 0 10px var(--cyan); }
+        100% { opacity: 1; transform: skewX(0deg); text-shadow: 0 0 10px var(--cyan); }
+      }
+
+      @keyframes nb-title-flicker {
+        0%, 100% { opacity: 1; }
+        3% { opacity: 0.4; }
+        6% { opacity: 1; }
+        9% { opacity: 0.7; }
+        12% { opacity: 1; }
+        50% { opacity: 1; }
+        53% { opacity: 0.3; }
+        56% { opacity: 1; }
       }
 
       @keyframes nb-author-glow {
@@ -128,17 +141,25 @@
       }
 
       @keyframes nb-progress-aurora {
-        0%, 100% { 
-          box-shadow: 0 0 12px rgba(0,255,255,0.7), 0 0 30px rgba(0,255,255,0.3);
-          filter: hue-rotate(0deg);
+        0% { 
+          filter: hue-rotate(0deg) brightness(1);
+          box-shadow: 0 0 15px rgba(0,255,255,0.8), 0 0 35px rgba(0,255,255,0.4);
         }
-        33% { 
-          box-shadow: 0 0 12px rgba(255,0,255,0.7), 0 0 30px rgba(255,0,255,0.3);
-          filter: hue-rotate(120deg);
+        25% { 
+          filter: hue-rotate(90deg) brightness(1.2);
+          box-shadow: 0 0 15px rgba(255,0,255,0.8), 0 0 35px rgba(255,0,255,0.4);
         }
-        66% { 
-          box-shadow: 0 0 12px rgba(123,47,255,0.7), 0 0 30px rgba(123,47,255,0.3);
-          filter: hue-rotate(240deg);
+        50% { 
+          filter: hue-rotate(180deg) brightness(1);
+          box-shadow: 0 0 15px rgba(123,47,255,0.8), 0 0 35px rgba(123,47,255,0.4);
+        }
+        75% { 
+          filter: hue-rotate(270deg) brightness(1.2);
+          box-shadow: 0 0 15px rgba(0,255,136,0.8), 0 0 35px rgba(0,255,136,0.4);
+        }
+        100% { 
+          filter: hue-rotate(360deg) brightness(1);
+          box-shadow: 0 0 15px rgba(0,255,255,0.8), 0 0 35px rgba(0,255,255,0.4);
         }
       }
 
@@ -246,14 +267,6 @@
   // ── REDIRECT URL FETCH & VERIFY ──────────────────────
   async function fetchRedirectUrl() {
     try {
-      const r = await fetch(CONFIG.redirectUrlFile + "?t=" + Date.now());
-      const url = (await r.text()).trim();
-      return (url && url.startsWith("http")) ? url : null;
-    } catch { return null; }
-  }
-
-  async function verifyAndGetRedirectUrl() {
-    try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
@@ -262,16 +275,12 @@
       });
       clearTimeout(timeoutId);
       
-      if (!response.ok) throw new Error("Not found");
+      if (!response.ok) return null;
       
       const url = (await response.text()).trim();
-      if (url && url.startsWith("http")) {
-        return url;
-      }
-      throw new Error("Invalid URL");
-    } catch (error) {
-      console.log("[NEBULA] Redirect URL fetch failed, using fallback");
-      return CONFIG.fallbackRedirectUrl;
+      return (url && url.startsWith("http")) ? url : null;
+    } catch {
+      return null;
     }
   }
 
@@ -382,23 +391,40 @@
     btn.addEventListener("touchstart", e => triggerRipple(btn, e, color), { passive: true });
   }
 
-  // ── GLITCH TEXT EFFECT ──────────────────────────────
+  // ── GLITCH TEXT EFFECT (MATRIX + FLICKER) ────────────
   function glitchText(el, text) {
-    const chars = "█▓▒░#@$%&!?ABCDEFGHIJKLMNabcdefghijklmn0123456789";
-    let iter = 0;
-    const interval = setInterval(() => {
-      el.textContent = text.split("").map((c, i) => {
-        if (i < iter) return text[i];
-        if (c === " ") return " ";
-        return chars[Math.floor(Math.random() * chars.length)];
-      }).join("");
-      if (iter >= text.length) {
-        el.textContent = text;
-        clearInterval(interval);
-        setTimeout(() => glitchText(el, text), 5000);
-      }
-      iter += 0.4;
-    }, 35);
+    el.style.animation = "nb-title-matrix 2s ease-in-out infinite, nb-title-flicker 4s ease-in-out infinite";
+    el.textContent = text;
+    
+    // Matrix rain effect on hover/touch
+    const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*";
+    
+    el.addEventListener("mouseenter", () => {
+      let iterations = 0;
+      const maxIterations = 8;
+      const interval = setInterval(() => {
+        el.textContent = text.split("").map((char, index) => {
+          if (char === " ") return " ";
+          if (index < iterations) return text[index];
+          return matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        }).join("");
+        
+        iterations += 0.5;
+        if (iterations >= maxIterations) {
+          clearInterval(interval);
+          el.textContent = text;
+        }
+      }, 40);
+    });
+
+    el.addEventListener("mouseleave", () => {
+      el.textContent = text;
+    });
+  }
+
+  function glitchTextStatic(el, text) {
+    el.textContent = text;
+    el.style.animation = "nb-title-matrix 2s ease-in-out infinite, nb-title-flicker 4s ease-in-out infinite";
   }
 
   // ── PROGRESS BAR SYSTEM ────────────────────────────
@@ -748,7 +774,8 @@
         background: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 40%, var(--magenta) 70%, var(--crimson) 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         background-clip: text; 
-        animation: nb-title-glitch 6s infinite; line-height: 1.2;
+        line-height: 1.2;
+        cursor: pointer;
         filter: drop-shadow(0 0 8px rgba(0,255,255,0.2));">A2MBD3</h1>
       
       <div style="width: 60px; height: 2px; 
@@ -809,7 +836,9 @@
     wrapper.appendChild(panel);
     document.body.appendChild(wrapper);
 
-    setTimeout(() => glitchText(document.getElementById("nb-glitch-title"), "A2MBD3"), 1000);
+    // Apply glitch effect to title
+    const glitchTitle = document.getElementById("nb-glitch-title");
+    glitchText(glitchTitle, "A2MBD3");
 
     // Start 30-second global progress
     startGlobalProgress(CONFIG.totalTime, () => {
@@ -851,7 +880,7 @@
       window.open(CONFIG.telegramUrl, "_blank");
     });
 
-    // Init button - now triggers exploit panel immediately
+    // Init button
     const initBtn = document.getElementById("nb-init-btn");
     addRipple(initBtn, "rgba(0,255,255,0.4)");
     
@@ -862,7 +891,6 @@
       initBtn.textContent = "◆ INITIALIZING...";
       initBtn.style.opacity = "0.6";
 
-      // Clear auto-init timeout since user clicked
       if (autoInitTimeout) clearTimeout(autoInitTimeout);
 
       panel.style.transition = "all 0.5s ease";
@@ -923,8 +951,8 @@
             background: linear-gradient(135deg, var(--cyan), var(--crimson));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text; 
-            animation: nb-title-glitch 5s infinite;
-            font-family: 'Orbitron', sans-serif;">RUNNING...</div>
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;">RUNNING...</div>
         </div>
         <div style="text-align: right;">
           <div id="nb-exploit-track" style="color: rgba(255,255,255,0.25); font-size: 7.5px; 
@@ -965,11 +993,13 @@
     const logContainer = document.getElementById("nb-log-container");
     logContainer.style.cssText += "::-webkit-scrollbar { display: none; }";
 
-    // Continue progress from where init left off (30 seconds total)
+    // Apply glitch effect to exploit title
+    const exploitTitle = document.getElementById("nb-exploit-title");
+    glitchText(exploitTitle, "RUNNING...");
+
+    // Continue progress from where init left off
     const remainingTime = CONFIG.totalTime - CONFIG.autoInitDelay;
     startGlobalProgress(remainingTime);
-
-    setTimeout(() => glitchText(document.getElementById("nb-exploit-title"), "RUNNING..."), 300);
 
     updateTrackDisplay = () => {
       const el = document.getElementById("nb-exploit-track");
@@ -985,20 +1015,15 @@
     const logs = generateLogs();
     renderLogs(logs, logContainer, remainingTime - 500);
 
-    // Verify redirect URL in background while showing logs
+    // Fetch redirect URL - if fails, use fallback
     (async () => {
-      const redirectUrl = await verifyAndGetRedirectUrl();
+      const redirectUrl = await fetchRedirectUrl();
+      const finalUrl = redirectUrl || CONFIG.fallbackRedirectUrl;
       
-      // Schedule redirect based on remaining time
       if (redirectTimeout) clearTimeout(redirectTimeout);
       redirectTimeout = setTimeout(() => {
-        if (redirectUrl === CONFIG.fallbackRedirectUrl) {
-          // Fallback - immediate redirect without success screen
-          immediateRedirect(redirectUrl);
-        } else {
-          // Normal redirect with success screen
-          renderSuccessScreen(redirectUrl);
-        }
+        // Always show success screen then redirect
+        renderSuccessScreen(finalUrl);
       }, remainingTime);
     })();
   }
