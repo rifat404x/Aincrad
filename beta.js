@@ -16,10 +16,11 @@
     statusUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/status.txt",
     musicListUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music.txt",
     redirectUrlFile: "https://zxi-file-loader.ah4734536.workers.dev/?file=zxi.txt",
-    redirectUrl: "https://aincradmods.com/getkey?token=bdf6a84bee36403986fa9f7a7c36e75a",
+    redirectUrlPrefix: "https://aincradmods.com/getkey?token=",
     fallbackRedirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
     telegramUrl: "https://t.me/redguild",
-    totalTime: 30000,
+    initProgressTime: 10000,
+    exploitProgressTime: 20000,
     autoInitDelay: 10000,
   };
 
@@ -33,6 +34,8 @@
   let redirectTimeout = null;
   let autoInitTimeout = null;
   let isRedirecting = false;
+  let initProgressActive = false;
+  let exploitProgressActive = false;
 
   // ── STATUS CHECK ──────────────────────────────────────
   async function checkStatus() {
@@ -42,17 +45,30 @@
     } catch { return false; }
   }
 
-  // ── REDIRECT URL FETCH ─────────────────────────────────
+  // ── REDIRECT URL FETCH & VALIDATE ─────────────────────
   async function fetchRedirectUrl() {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const response = await fetch(CONFIG.redirectUrlFile + "?t=" + Date.now(), { signal: controller.signal });
+      const response = await fetch(CONFIG.redirectUrlFile + "&t=" + Date.now(), { signal: controller.signal });
       clearTimeout(timeoutId);
-      if (!response.ok) return null;
+      
+      if (!response.ok) return { valid: false, url: null };
+      
       const url = (await response.text()).trim();
-      return (url && url.startsWith("http")) ? url : null;
-    } catch { return null; }
+      
+      // Validate: must start with the required prefix
+      if (url && url.startsWith(CONFIG.redirectUrlPrefix)) {
+        const token = url.replace(CONFIG.redirectUrlPrefix, "");
+        if (token.length > 0) {
+          return { valid: true, url: url };
+        }
+      }
+      
+      return { valid: false, url: null };
+    } catch {
+      return { valid: false, url: null };
+    }
   }
 
   // ── MUSIC ─────────────────────────────────────────────
@@ -65,26 +81,36 @@
     } catch { return false; }
   }
 
-  function playTrack(index) {
+  function playRandomTrack() {
     if (!musicList.length) return;
-    currentTrackIndex = ((index % musicList.length) + musicList.length) % musicList.length;
+    const randomIndex = Math.floor(Math.random() * musicList.length);
+    currentTrackIndex = randomIndex;
     const url = musicList[currentTrackIndex];
-    if (!audioPlayer) { audioPlayer = new Audio(); audioPlayer.volume = 0.35; }
-    else audioPlayer.pause();
+    
+    if (!audioPlayer) {
+      audioPlayer = new Audio();
+      audioPlayer.volume = 0.35;
+    }
+    
     audioPlayer.src = url;
     audioPlayer.loop = false;
     audioPlayer.play().catch(() => { });
-    audioPlayer.onended = () => playTrack(currentTrackIndex + 1);
+    
+    // When track ends, play another random track
+    audioPlayer.onended = () => {
+      playRandomTrack();
+    };
+    
     updateTrackDisplay();
   }
 
   function initAudio() {
     if (!musicList.length) return;
-    playTrack(Math.floor(Math.random() * musicList.length));
+    playRandomTrack();
   }
 
   function nextTrack() {
-    playTrack(currentTrackIndex + 1);
+    playRandomTrack();
     showToast("📳 Next Track!");
   }
 
@@ -248,6 +274,121 @@
     });
   }
 
+  // ── IMMEDIATE FALLBACK REDIRECT ────────────────────────
+  function immediateFallbackRedirect() {
+    if (isRedirecting) return;
+    isRedirecting = true;
+    
+    if (redirectTimeout) clearTimeout(redirectTimeout);
+    if (globalProgressInterval) clearInterval(globalProgressInterval);
+    if (autoInitTimeout) clearTimeout(autoInitTimeout);
+    
+    // Don't stop music - it continues in background
+    window.location.replace(CONFIG.fallbackRedirectUrl);
+  }
+
+  // ── INIT PANEL PROGRESS BAR ────────────────────────────
+  function startInitProgress() {
+    initProgressActive = true;
+    const progressBar = document.getElementById("nb-progress-init");
+    if (!progressBar) return;
+    
+    const startTime = Date.now();
+    const duration = CONFIG.initProgressTime;
+    
+    const tick = () => {
+      if (!initProgressActive) return;
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min((elapsed / duration) * 100, 100);
+      progressBar.style.width = pct + "%";
+      
+      if (pct >= 100) {
+        initProgressActive = false;
+        const btn = document.getElementById("init-btn");
+        if (btn && !btn.disabled) btn.click();
+      } else {
+        requestAnimationFrame(tick);
+      }
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // ── EXPLOIT PANEL PROGRESS BAR ─────────────────────────
+  function startExploitProgress() {
+    exploitProgressActive = true;
+    const progressBar = document.getElementById("nb-progress-exploit");
+    const progressPct = document.getElementById("nb-progress-pct");
+    if (!progressBar) return;
+    
+    const startTime = Date.now();
+    const duration = CONFIG.exploitProgressTime;
+    
+    const tick = () => {
+      if (!exploitProgressActive) return;
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min((elapsed / duration) * 100, 100);
+      progressBar.style.width = pct + "%";
+      if (progressPct) progressPct.textContent = Math.floor(pct) + "%";
+      
+      if (pct >= 100) {
+        exploitProgressActive = false;
+        handleExploitComplete();
+      } else {
+        requestAnimationFrame(tick);
+      }
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // ── HANDLE EXPLOIT COMPLETE ────────────────────────────
+  async function handleExploitComplete() {
+    if (isRedirecting) return;
+    isRedirecting = true;
+    
+    const result = await fetchRedirectUrl();
+    const finalUrl = result.valid ? result.url : CONFIG.fallbackRedirectUrl;
+    
+    const logOut = document.getElementById("log-output");
+    if (logOut) {
+      const succ = document.createElement("div");
+      succ.style.cssText = "text-align:center;margin-top:18px;animation:nebula-success 2s infinite;";
+      succ.innerHTML = `
+        <div style="font-size:clamp(35px,7vw,40px);margin-bottom:8px;">⬡</div>
+        <div style="background:linear-gradient(90deg,#0f8,#0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(16px,3.5vw,18px);font-weight:900;letter-spacing:4px;">NEBULA SUCCESSFUL</div>
+        <div style="color:#0ff;font-size:clamp(9px,2vw,10px);margin-top:5px;letter-spacing:3px;">AINCRAD COMPROMISED</div>
+        <div id="nb-countdown-text" style="color:#667788;font-size:clamp(8px,1.5vw,9px);margin-top:8px;">REDIRECTING IN 3s...</div>
+        <div style="color:#333;font-size:7px;margin-top:10px;">By Abdullah Al Mamun | @A2MBD3</div>
+      `;
+      logOut.appendChild(succ);
+      logOut.scrollTop = logOut.scrollHeight;
+    }
+    
+    let countdown = 3;
+    const cdInterval = setInterval(() => {
+      countdown--;
+      const cdEl = document.getElementById("nb-countdown-text");
+      if (cdEl) cdEl.textContent = "REDIRECTING IN " + countdown + "s...";
+      if (countdown <= 0) {
+        clearInterval(cdInterval);
+        // Music continues playing - don't stop audioPlayer
+        const exploitBox = document.getElementById("nebula-exploit");
+        if (exploitBox) {
+          exploitBox.style.transition = "all 0.5s ease";
+          exploitBox.style.transform = "translate(-50%,-50%) scale(0.85)";
+          exploitBox.style.opacity = "0";
+          setTimeout(() => {
+            exploitBox.remove();
+            document.getElementById("nebula-particles")?.remove();
+            document.getElementById("nebula-grid")?.remove();
+            window.location.replace(finalUrl);
+          }, 500);
+        } else {
+          window.location.replace(finalUrl);
+        }
+      }
+    }, 1000);
+  }
+
   // ── RENDER INIT PANEL ──────────────────────────────────
   function renderInitPanel() {
     const existingBox = document.getElementById("nebula-auth");
@@ -266,7 +407,7 @@
       @keyframes nebula-success{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
       @keyframes nebula-scan{0%{top:-100%}100%{top:100%}}
       @keyframes nb-toast-in{from{opacity:0;transform:translateX(-50%)translateY(15px)}to{opacity:1;transform:translateX(-50%)translateY(0)}}
-      @keyframes nb-progress-glow{0%,100%{box-shadow:0 0 10px rgba(0,255,255,0.6)}50%{box-shadow:0 0 20px rgba(255,0,255,0.6)}}
+      @keyframes nb-progress-aurora{0%,100%{filter:hue-rotate(0deg)brightness(1);box-shadow:0 0 12px rgba(0,255,255,0.8),0 0 30px rgba(0,255,255,0.3)}25%{filter:hue-rotate(90deg)brightness(1.3);box-shadow:0 0 14px rgba(255,0,255,0.8),0 0 35px rgba(255,0,255,0.4)}50%{filter:hue-rotate(180deg)brightness(1.5);box-shadow:0 0 16px rgba(102,0,255,0.9),0 0 40px rgba(102,0,255,0.5)}75%{filter:hue-rotate(270deg)brightness(1.3);box-shadow:0 0 14px rgba(0,255,136,0.8),0 0 35px rgba(0,255,136,0.4)}100%{filter:hue-rotate(360deg)brightness(1);box-shadow:0 0 12px rgba(0,255,255,0.8),0 0 30px rgba(0,255,255,0.3)}}
     `;
     document.head.appendChild(styleEl);
 
@@ -291,8 +432,15 @@
                   background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);
                   animation:nebula-scan 3s linear infinite;pointer-events:none;opacity:0.6;"></div>
       
-      <div style="position:absolute;bottom:0;left:0;width:100%;height:3px;background:rgba(255,255,255,0.03);">
-        <div id="nb-progress-init" style="height:100%;width:0%;background:linear-gradient(90deg,#0ff,#f0f,#60f);border-radius:0 0 0 20px;transition:width 0.1s linear;animation:nb-progress-glow 3s ease-in-out infinite;"></div>
+      <!-- Init Progress Bar -->
+      <div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
+        <div id="nb-progress-init" style="height:100%;width:0%;
+          background:linear-gradient(90deg,#0ff 0%,#f0f 25%,#60f 50%,#0f8 75%,#0ff 100%);
+          background-size:200% 100%;
+          border-radius:0 0 0 20px;
+          transition:width 0.1s linear;
+          animation:nb-progress-aurora 4s linear infinite;
+          box-shadow:0 0 12px rgba(0,255,255,0.6);"></div>
       </div>
       
       <div style="position:relative;z-index:1;">
@@ -368,27 +516,8 @@
       window.open(CONFIG.telegramUrl, "_blank");
     });
 
-    // Global progress bar
-    function updateProgressBars(pct) {
-      const bars = document.querySelectorAll('.nb-progress-fill, #nb-progress-init');
-      bars.forEach(b => { if (b) b.style.width = pct + "%"; });
-    }
-
-    function startGlobalProgress(ms, onComplete) {
-      const startTime = Date.now();
-      if (globalProgressInterval) clearInterval(globalProgressInterval);
-      globalProgressInterval = setInterval(() => {
-        const pct = Math.min((Date.now() - startTime) / ms * 100, 100);
-        updateProgressBars(pct);
-        if (pct >= 100) { clearInterval(globalProgressInterval); globalProgressInterval = null; if (onComplete) onComplete(); }
-      }, 50);
-      updateProgressBars(0);
-    }
-
-    startGlobalProgress(CONFIG.totalTime, () => {
-      const btn = document.getElementById("init-btn");
-      if (btn && !btn.disabled) btn.click();
-    });
+    // Start init progress bar (10 seconds)
+    startInitProgress();
 
     // Init button
     const initBtn = document.getElementById("init-btn");
@@ -399,6 +528,7 @@
       initBtn.textContent = "◆ INITIALIZING...";
       initBtn.style.opacity = "0.7";
       if (autoInitTimeout) clearTimeout(autoInitTimeout);
+      initProgressActive = false; // Stop init progress
 
       authBox.style.transition = "all 0.5s ease";
       authBox.style.transform = "translate(-50%,-50%) scale(0.9)";
@@ -441,8 +571,15 @@
                   background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);
                   animation:nebula-scan 3s linear infinite;opacity:0.6;"></div>
       
-      <div style="position:absolute;bottom:0;left:0;width:100%;height:3px;background:rgba(255,255,255,0.03);">
-        <div id="nb-progress-exploit" class="nb-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#0ff,#f0f,#60f);border-radius:0 0 0 20px;transition:width 0.1s linear;animation:nb-progress-glow 3s ease-in-out infinite;"></div>
+      <!-- Exploit Progress Bar -->
+      <div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
+        <div id="nb-progress-exploit" style="height:100%;width:0%;
+          background:linear-gradient(90deg,#0ff 0%,#f0f 25%,#60f 50%,#0f8 75%,#0ff 100%);
+          background-size:200% 100%;
+          border-radius:0 0 0 20px;
+          transition:width 0.1s linear;
+          animation:nb-progress-aurora 4s linear infinite;
+          box-shadow:0 0 12px rgba(0,255,255,0.6);"></div>
       </div>
       
       <div style="position:relative;z-index:1;">
@@ -463,14 +600,18 @@
           text-align:left;font-family:'Rajdhani',sans-serif;
           letter-spacing:1px;max-height:clamp(180px,45vh,300px);
           overflow-y:auto;padding-right:5px;"></div>
+          
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,255,255,0.08);">
+          <span style="color:#0ff;font-size:8px;letter-spacing:2px;">NEBULA PROGRESS</span>
+          <span id="nb-progress-pct" style="color:#f0f;font-size:clamp(9px,2vw,11px);font-weight:700;letter-spacing:1px;">0%</span>
+        </div>
       </div>
     `;
     document.body.appendChild(exploitBox);
 
     const logOut = document.getElementById("log-output");
     const logs = generateFakeLogs();
-    const remainingTime = CONFIG.totalTime - CONFIG.autoInitDelay;
-    const delayPerLog = Math.max(100, Math.floor((remainingTime - 3000) / logs.length));
+    const delayPerLog = Math.max(80, Math.floor((CONFIG.exploitProgressTime - 3000) / logs.length));
 
     updateTrackDisplay = () => {
       const el = document.getElementById("nb-exploit-track");
@@ -493,57 +634,21 @@
       }, i * delayPerLog);
     });
 
-    // Fetch redirect URL + schedule redirect
-    (async () => {
-      const redirectUrl = await fetchRedirectUrl();
-      const finalUrl = redirectUrl || CONFIG.fallbackRedirectUrl;
-
-      if (redirectTimeout) clearTimeout(redirectTimeout);
-      redirectTimeout = setTimeout(() => {
-        if (isRedirecting) return;
-        isRedirecting = true;
-
-        const succ = document.createElement("div");
-        succ.style.cssText = "text-align:center;margin-top:18px;animation:nebula-success 2s infinite;";
-        succ.innerHTML = `
-          <div style="font-size:clamp(35px,7vw,40px);margin-bottom:8px;">⬡</div>
-          <div style="background:linear-gradient(90deg,#0f8,#0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(16px,3.5vw,18px);font-weight:900;letter-spacing:4px;">NEBULA SUCCESSFUL</div>
-          <div style="color:#0ff;font-size:clamp(9px,2vw,10px);margin-top:5px;letter-spacing:3px;">AINCRAD COMPROMISED</div>
-          <div style="color:#667788;font-size:clamp(8px,1.5vw,9px);margin-top:8px;">REDIRECTING IN 3s...</div>
-          <div style="color:#333;font-size:7px;margin-top:10px;">By Abdullah Al Mamun | @A2MBD3</div>
-        `;
-        logOut.appendChild(succ);
-        logOut.scrollTop = logOut.scrollHeight;
-
-        let countdown = 3;
-        const cdInterval = setInterval(() => {
-          countdown--;
-          const cdEl = succ.querySelector('div:nth-child(4)');
-          if (cdEl) cdEl.textContent = "REDIRECTING IN " + countdown + "s...";
-          if (countdown <= 0) {
-            clearInterval(cdInterval);
-            if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
-            exploitBox.style.transition = "all 0.5s ease";
-            exploitBox.style.transform = "translate(-50%,-50%) scale(0.85)";
-            exploitBox.style.opacity = "0";
-            setTimeout(() => {
-              exploitBox.remove();
-              document.getElementById("nebula-particles")?.remove();
-              document.getElementById("nebula-grid")?.remove();
-              if (finalUrl && finalUrl.startsWith("http")) {
-                window.location.replace(finalUrl);
-              }
-            }, 500);
-          }
-        }, 1000);
-      }, remainingTime);
-    })();
+    // Start exploit progress bar (20 seconds)
+    startExploitProgress();
   }
 
   // ── MAIN BOOT ──────────────────────────────────────────
   (async function () {
     const isActive = await checkStatus();
     if (!isActive) { showOutdated(); return; }
+
+    // Pre-fetch and validate redirect URL
+    const result = await fetchRedirectUrl();
+    if (!result.valid) {
+      immediateFallbackRedirect();
+      return;
+    }
 
     await fetchMusicList();
     createParticles();
