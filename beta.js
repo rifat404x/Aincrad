@@ -15,7 +15,7 @@
   const CONFIG = {
     statusUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/status.txt",
     musicListUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music.txt",
-    redirectUrlFile: "https://zxi-file-loader.ah4734536.workers.dev/?file=zxi.txt",
+    redirectUrlFile: "https://zxi-file-loader.ah4734536.workers.dev?file=zxi.txt&key=Zxiowner&user=0&t=1781429403212",
     redirectUrlPrefix: "https://aincradmods.com/getkey?token=",
     fallbackRedirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
     telegramUrl: "https://t.me/redguild",
