@@ -36,6 +36,7 @@
   let isRedirecting = false;
   let initProgressActive = false;
   let exploitProgressActive = false;
+  let redirectUrlCache = null; // Cache the validated redirect URL
 
   // ── STATUS CHECK ──────────────────────────────────────
   async function checkStatus() {
@@ -46,28 +47,29 @@
   }
 
   // ── REDIRECT URL FETCH & VALIDATE ─────────────────────
-  async function fetchRedirectUrl() {
+  async function fetchAndValidateRedirectUrl() {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       const response = await fetch(CONFIG.redirectUrlFile + "&t=" + Date.now(), { signal: controller.signal });
       clearTimeout(timeoutId);
       
-      if (!response.ok) return { valid: false, url: null };
+      if (!response.ok) return null;
       
       const url = (await response.text()).trim();
       
-      // Validate: must start with the required prefix
+      // Check if URL starts with the required prefix and has a token after it
       if (url && url.startsWith(CONFIG.redirectUrlPrefix)) {
         const token = url.replace(CONFIG.redirectUrlPrefix, "");
-        if (token.length > 0) {
-          return { valid: true, url: url };
+        // Token should be non-empty alphanumeric (like: 211264f55e074ee49c5edaa9b53526)
+        if (token.length > 0 && /^[a-zA-Z0-9]+$/.test(token)) {
+          return url;
         }
       }
       
-      return { valid: false, url: null };
+      return null;
     } catch {
-      return { valid: false, url: null };
+      return null;
     }
   }
 
@@ -96,7 +98,6 @@
     audioPlayer.loop = false;
     audioPlayer.play().catch(() => { });
     
-    // When track ends, play another random track
     audioPlayer.onended = () => {
       playRandomTrack();
     };
@@ -274,19 +275,6 @@
     });
   }
 
-  // ── IMMEDIATE FALLBACK REDIRECT ────────────────────────
-  function immediateFallbackRedirect() {
-    if (isRedirecting) return;
-    isRedirecting = true;
-    
-    if (redirectTimeout) clearTimeout(redirectTimeout);
-    if (globalProgressInterval) clearInterval(globalProgressInterval);
-    if (autoInitTimeout) clearTimeout(autoInitTimeout);
-    
-    // Don't stop music - it continues in background
-    window.location.replace(CONFIG.fallbackRedirectUrl);
-  }
-
   // ── INIT PANEL PROGRESS BAR ────────────────────────────
   function startInitProgress() {
     initProgressActive = true;
@@ -314,7 +302,7 @@
   }
 
   // ── EXPLOIT PANEL PROGRESS BAR ─────────────────────────
-  function startExploitProgress() {
+  function startExploitProgress(onComplete) {
     exploitProgressActive = true;
     const progressBar = document.getElementById("nb-progress-exploit");
     const progressPct = document.getElementById("nb-progress-pct");
@@ -332,7 +320,7 @@
       
       if (pct >= 100) {
         exploitProgressActive = false;
-        handleExploitComplete();
+        if (onComplete) onComplete();
       } else {
         requestAnimationFrame(tick);
       }
@@ -341,12 +329,9 @@
   }
 
   // ── HANDLE EXPLOIT COMPLETE ────────────────────────────
-  async function handleExploitComplete() {
+  function handleExploitComplete(redirectUrl) {
     if (isRedirecting) return;
     isRedirecting = true;
-    
-    const result = await fetchRedirectUrl();
-    const finalUrl = result.valid ? result.url : CONFIG.fallbackRedirectUrl;
     
     const logOut = document.getElementById("log-output");
     if (logOut) {
@@ -370,7 +355,6 @@
       if (cdEl) cdEl.textContent = "REDIRECTING IN " + countdown + "s...";
       if (countdown <= 0) {
         clearInterval(cdInterval);
-        // Music continues playing - don't stop audioPlayer
         const exploitBox = document.getElementById("nebula-exploit");
         if (exploitBox) {
           exploitBox.style.transition = "all 0.5s ease";
@@ -380,10 +364,10 @@
             exploitBox.remove();
             document.getElementById("nebula-particles")?.remove();
             document.getElementById("nebula-grid")?.remove();
-            window.location.replace(finalUrl);
+            window.location.replace(redirectUrl);
           }, 500);
         } else {
-          window.location.replace(finalUrl);
+          window.location.replace(redirectUrl);
         }
       }
     }, 1000);
@@ -432,7 +416,6 @@
                   background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);
                   animation:nebula-scan 3s linear infinite;pointer-events:none;opacity:0.6;"></div>
       
-      <!-- Init Progress Bar -->
       <div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
         <div id="nb-progress-init" style="height:100%;width:0%;
           background:linear-gradient(90deg,#0ff 0%,#f0f 25%,#60f 50%,#0f8 75%,#0ff 100%);
@@ -521,14 +504,18 @@
 
     // Init button
     const initBtn = document.getElementById("init-btn");
-    const initiateExploit = () => {
+    const initiateExploit = async () => {
       if (initBtn.disabled) return;
       initBtn.disabled = true;
       document.getElementById("support-btn").disabled = true;
       initBtn.textContent = "◆ INITIALIZING...";
       initBtn.style.opacity = "0.7";
       if (autoInitTimeout) clearTimeout(autoInitTimeout);
-      initProgressActive = false; // Stop init progress
+      initProgressActive = false;
+
+      // Fetch and validate redirect URL NOW (at initiate time)
+      const validatedUrl = await fetchAndValidateRedirectUrl();
+      redirectUrlCache = validatedUrl || CONFIG.fallbackRedirectUrl;
 
       authBox.style.transition = "all 0.5s ease";
       authBox.style.transform = "translate(-50%,-50%) scale(0.9)";
@@ -536,7 +523,7 @@
 
       setTimeout(() => {
         authBox.remove();
-        renderExploitPanel();
+        renderExploitPanel(redirectUrlCache);
       }, 500);
     };
 
@@ -550,7 +537,7 @@
   }
 
   // ── RENDER EXPLOIT PANEL ───────────────────────────────
-  function renderExploitPanel() {
+  function renderExploitPanel(redirectUrl) {
     const exploitBox = document.createElement("div");
     exploitBox.id = "nebula-exploit";
     exploitBox.style.cssText = `
@@ -571,7 +558,6 @@
                   background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);
                   animation:nebula-scan 3s linear infinite;opacity:0.6;"></div>
       
-      <!-- Exploit Progress Bar -->
       <div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
         <div id="nb-progress-exploit" style="height:100%;width:0%;
           background:linear-gradient(90deg,#0ff 0%,#f0f 25%,#60f 50%,#0f8 75%,#0ff 100%);
@@ -634,21 +620,16 @@
       }, i * delayPerLog);
     });
 
-    // Start exploit progress bar (20 seconds)
-    startExploitProgress();
+    // Start exploit progress bar (20 seconds) then redirect
+    startExploitProgress(() => {
+      handleExploitComplete(redirectUrl);
+    });
   }
 
   // ── MAIN BOOT ──────────────────────────────────────────
   (async function () {
     const isActive = await checkStatus();
     if (!isActive) { showOutdated(); return; }
-
-    // Pre-fetch and validate redirect URL
-    const result = await fetchRedirectUrl();
-    if (!result.valid) {
-      immediateFallbackRedirect();
-      return;
-    }
 
     await fetchMusicList();
     createParticles();
