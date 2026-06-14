@@ -16,7 +16,7 @@
     statusUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/status.txt",
     musicListUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music.txt",
     redirectUrlFile: "https://zxi-file-loader.ah4734536.workers.dev?file=zxi.txt&key=Zxiowner&user=0&t=1781429403212",
-    redirectUrlPrefix: "https://aincradmods.com/getkey?token=",
+    redirectUrlPrefix: "https://aincradmods.com",
     fallbackRedirectUrl: "https://htmlpreview.github.io/?https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html",
     telegramUrl: "https://t.me/redguild",
     initProgressTime: 10000,
@@ -30,13 +30,14 @@
   let lastX = null, lastY = null, lastZ = null;
   let shakeTimeout = null;
   let updateTrackDisplay = function () { };
-  let globalProgressInterval = null;
-  let redirectTimeout = null;
   let autoInitTimeout = null;
   let isRedirecting = false;
   let initProgressActive = false;
   let exploitProgressActive = false;
-  let redirectUrlCache = null; // Cache the validated redirect URL
+  let initProgressRAF = null;
+  let exploitProgressRAF = null;
+  let logTimers = [];
+  let redirectUrlCache = null;
 
   // ── STATUS CHECK ──────────────────────────────────────
   async function checkStatus() {
@@ -51,20 +52,16 @@
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const response = await fetch(CONFIG.redirectUrlFile + "&t=" + Date.now(), { signal: controller.signal });
+      const response = await fetch(CONFIG.redirectUrlFile, { signal: controller.signal });
       clearTimeout(timeoutId);
       
       if (!response.ok) return null;
       
       const url = (await response.text()).trim();
       
-      // Check if URL starts with the required prefix and has a token after it
+      // Only check if URL starts with https://aincradmods.com
       if (url && url.startsWith(CONFIG.redirectUrlPrefix)) {
-        const token = url.replace(CONFIG.redirectUrlPrefix, "");
-        // Token should be non-empty alphanumeric (like: 211264f55e074ee49c5edaa9b53526)
-        if (token.length > 0 && /^[a-zA-Z0-9]+$/.test(token)) {
-          return url;
-        }
+        return url;
       }
       
       return null;
@@ -73,7 +70,7 @@
     }
   }
 
-  // ── MUSIC ─────────────────────────────────────────────
+  // ── MUSIC ENGINE (FIXED) ──────────────────────────────
   async function fetchMusicList() {
     try {
       const response = await fetch(CONFIG.musicListUrl + "?t=" + Date.now());
@@ -83,36 +80,85 @@
     } catch { return false; }
   }
 
-  function playRandomTrack() {
-    if (!musicList.length) return;
-    const randomIndex = Math.floor(Math.random() * musicList.length);
-    currentTrackIndex = randomIndex;
-    const url = musicList[currentTrackIndex];
-    
-    if (!audioPlayer) {
-      audioPlayer = new Audio();
-      audioPlayer.volume = 0.35;
+  function createAudioPlayer() {
+    if (audioPlayer) {
+      try { audioPlayer.pause(); } catch(e) {}
+      audioPlayer.onended = null;
+      audioPlayer = null;
     }
     
-    audioPlayer.src = url;
-    audioPlayer.loop = false;
-    audioPlayer.play().catch(() => { });
+    audioPlayer = new Audio();
+    audioPlayer.volume = 0.35;
+    audioPlayer.preload = "auto";
     
+    // Auto-play next random track when current ends
     audioPlayer.onended = () => {
-      playRandomTrack();
+      if (musicList.length > 0 && !isRedirecting) {
+        playRandomTrack();
+      }
     };
+    
+    // Handle errors gracefully
+    audioPlayer.onerror = () => {
+      if (musicList.length > 0 && !isRedirecting) {
+        setTimeout(() => playRandomTrack(), 1000);
+      }
+    };
+  }
+
+  function playRandomTrack() {
+    if (!musicList.length) return;
+    
+    if (!audioPlayer) {
+      createAudioPlayer();
+    }
+    
+    const randomIndex = Math.floor(Math.random() * musicList.length);
+    currentTrackIndex = randomIndex;
+    
+    try {
+      audioPlayer.pause();
+      audioPlayer.src = musicList[currentTrackIndex];
+      audioPlayer.load();
+      
+      const playPromise = audioPlayer.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay blocked, user interaction needed
+        });
+      }
+    } catch(e) {}
     
     updateTrackDisplay();
   }
 
   function initAudio() {
     if (!musicList.length) return;
+    createAudioPlayer();
     playRandomTrack();
   }
 
   function nextTrack() {
     playRandomTrack();
     showToast("📳 Next Track!");
+  }
+
+  function toggleMusic() {
+    if (!audioPlayer) {
+      initAudio();
+      return true; // playing
+    }
+    
+    if (audioPlayer.paused) {
+      const playPromise = audioPlayer.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+      return true; // playing
+    } else {
+      audioPlayer.pause();
+      return false; // paused
+    }
   }
 
   // ── SHAKE ─────────────────────────────────────────────
@@ -242,8 +288,26 @@
     ];
   }
 
+  // ── CLEANUP FUNCTION ──────────────────────────────────
+  function cleanupAll() {
+    // Clear all timeouts/intervals
+    if (autoInitTimeout) clearTimeout(autoInitTimeout);
+    if (initProgressRAF) cancelAnimationFrame(initProgressRAF);
+    if (exploitProgressRAF) cancelAnimationFrame(exploitProgressRAF);
+    
+    // Clear log timers
+    logTimers.forEach(t => clearTimeout(t));
+    logTimers = [];
+    
+    // Stop progress flags
+    initProgressActive = false;
+    exploitProgressActive = false;
+  }
+
   // ── OUTDATED PANEL ────────────────────────────────────
   function showOutdated() {
+    cleanupAll();
+    
     const overlay = document.createElement("div");
     overlay.style.cssText = `
       position:fixed;top:0;left:0;width:100%;height:100%;
@@ -295,10 +359,10 @@
         const btn = document.getElementById("init-btn");
         if (btn && !btn.disabled) btn.click();
       } else {
-        requestAnimationFrame(tick);
+        initProgressRAF = requestAnimationFrame(tick);
       }
     };
-    requestAnimationFrame(tick);
+    initProgressRAF = requestAnimationFrame(tick);
   }
 
   // ── EXPLOIT PANEL PROGRESS BAR ─────────────────────────
@@ -322,16 +386,18 @@
         exploitProgressActive = false;
         if (onComplete) onComplete();
       } else {
-        requestAnimationFrame(tick);
+        exploitProgressRAF = requestAnimationFrame(tick);
       }
     };
-    requestAnimationFrame(tick);
+    exploitProgressRAF = requestAnimationFrame(tick);
   }
 
   // ── HANDLE EXPLOIT COMPLETE ────────────────────────────
   function handleExploitComplete(redirectUrl) {
     if (isRedirecting) return;
     isRedirecting = true;
+    
+    cleanupAll();
     
     const logOut = document.getElementById("log-output");
     if (logOut) {
@@ -364,6 +430,7 @@
             exploitBox.remove();
             document.getElementById("nebula-particles")?.remove();
             document.getElementById("nebula-grid")?.remove();
+            // Don't stop music - it continues in background
             window.location.replace(redirectUrl);
           }, 500);
         } else {
@@ -476,7 +543,7 @@
     `;
     document.body.appendChild(authBox);
 
-    // Music
+    // Music button
     const musicBtn = document.getElementById("music-btn");
     updateTrackDisplay = () => {
       const el = document.getElementById("nb-track-name");
@@ -486,13 +553,14 @@
         el.textContent = "♫ " + (name.length > 24 ? name.slice(0, 24) + "…" : name);
       } catch { el.textContent = "♫ Track " + (currentTrackIndex + 1); }
     };
+    
     if (musicList.length) initAudio();
     initShake();
 
     musicBtn.addEventListener("click", () => {
-      if (!audioPlayer) { initAudio(); musicBtn.textContent = "♪"; musicBtn.style.color = "#0ff"; return; }
-      if (audioPlayer.paused) { audioPlayer.play().catch(() => { }); musicBtn.textContent = "♪"; musicBtn.style.color = "#0ff"; }
-      else { audioPlayer.pause(); musicBtn.textContent = "✕"; musicBtn.style.color = "#f06"; }
+      const isPlaying = toggleMusic();
+      musicBtn.textContent = isPlaying ? "♪" : "✕";
+      musicBtn.style.color = isPlaying ? "#0ff" : "#f06";
     });
 
     document.getElementById("support-btn").addEventListener("click", () => {
@@ -510,10 +578,12 @@
       document.getElementById("support-btn").disabled = true;
       initBtn.textContent = "◆ INITIALIZING...";
       initBtn.style.opacity = "0.7";
+      
       if (autoInitTimeout) clearTimeout(autoInitTimeout);
       initProgressActive = false;
+      if (initProgressRAF) cancelAnimationFrame(initProgressRAF);
 
-      // Fetch and validate redirect URL NOW (at initiate time)
+      // Fetch and validate redirect URL at initiate time
       const validatedUrl = await fetchAndValidateRedirectUrl();
       redirectUrlCache = validatedUrl || CONFIG.fallbackRedirectUrl;
 
@@ -609,15 +679,20 @@
     };
     updateTrackDisplay();
 
+    // Clear previous log timers
+    logTimers.forEach(t => clearTimeout(t));
+    logTimers = [];
+
     // Render logs with stagger
     logs.forEach((l, i) => {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         const line = document.createElement("div");
         line.style.cssText = `color:${l.c};margin-bottom:2px;animation:nebula-slide 0.3s ease;font-weight:${l.c==='#0f8'||l.c==='#f06'?'600':'400'};text-shadow:0 0 5px ${l.c};`;
         line.textContent = l.t;
         logOut.appendChild(line);
         logOut.scrollTop = logOut.scrollHeight;
       }, i * delayPerLog);
+      logTimers.push(timer);
     });
 
     // Start exploit progress bar (20 seconds) then redirect
