@@ -24,12 +24,145 @@
     autoInitDelay: 10000,
   };
 
-  let audioPlayer = null;
-  let musicList = [];
-  let currentTrackIndex = -1;
+  // ═══════════════════════════════════════════════
+  // AUDIO ENGINE - FIXED
+  // ═══════════════════════════════════════════════
+  const AudioEngine = {
+    player: null,
+    musicList: [],
+    currentIndex: -1,
+    isPlaying: false,
+    isInitialized: false,
+    onTrackChange: null,
+
+    init(list) {
+      this.musicList = list;
+      this.isInitialized = true;
+      
+      // Create player on first user interaction
+      document.addEventListener('click', () => {
+        if (!this.player && this.musicList.length > 0) {
+          this._createPlayer();
+          this.playRandom();
+        }
+      }, { once: true });
+      
+      document.addEventListener('touchstart', () => {
+        if (!this.player && this.musicList.length > 0) {
+          this._createPlayer();
+          this.playRandom();
+        }
+      }, { once: true });
+    },
+
+    _createPlayer() {
+      if (this.player) {
+        this.player.pause();
+        this.player.onended = null;
+        this.player.onerror = null;
+        this.player.src = '';
+        this.player.load();
+      }
+      
+      this.player = new Audio();
+      this.player.volume = 0.35;
+      
+      this.player.onended = () => {
+        this.playRandom();
+      };
+      
+      this.player.onerror = (e) => {
+        // Skip bad URLs and try next
+        const errorCodes = ['MEDIA_ERR_ABORTED', 'MEDIA_ERR_NETWORK', 'MEDIA_ERR_DECODE', 'MEDIA_ERR_SRC_NOT_SUPPORTED'];
+        console.warn('[NEBULA] Audio error:', errorCodes[e.target.error?.code] || 'UNKNOWN');
+        this.isPlaying = false;
+        // Remove bad URL and try again
+        if (this.musicList[this.currentIndex]) {
+          this.musicList.splice(this.currentIndex, 1);
+        }
+        if (this.musicList.length > 0) {
+          setTimeout(() => this.playRandom(), 500);
+        }
+      };
+    },
+
+    playRandom() {
+      if (!this.musicList.length) return;
+      if (!this.player) this._createPlayer();
+      
+      // Pick random different from current
+      let newIndex;
+      if (this.musicList.length === 1) {
+        newIndex = 0;
+      } else {
+        do {
+          newIndex = Math.floor(Math.random() * this.musicList.length);
+        } while (newIndex === this.currentIndex && this.musicList.length > 1);
+      }
+      
+      this.currentIndex = newIndex;
+      const url = this.musicList[this.currentIndex];
+      
+      // Set source and play
+      this.player.pause();
+      this.player.src = url;
+      this.player.load();
+      
+      const playPromise = this.player.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          this.isPlaying = true;
+          if (this.onTrackChange) this.onTrackChange();
+        }).catch((err) => {
+          console.warn('[NEBULA] Play blocked:', err.message);
+          this.isPlaying = false;
+          // Browser requires user gesture - will play on next interaction
+        });
+      }
+    },
+
+    toggle() {
+      if (!this.player) {
+        this._createPlayer();
+        this.playRandom();
+        return true;
+      }
+      
+      if (this.player.paused) {
+        const playPromise = this.player.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            this.isPlaying = true;
+          }).catch(() => {
+            this.isPlaying = false;
+          });
+        }
+        return !this.player.paused;
+      } else {
+        this.player.pause();
+        this.isPlaying = false;
+        return false;
+      }
+    },
+
+    next() {
+      this.playRandom();
+    },
+
+    getTrackName() {
+      if (!this.musicList.length || this.currentIndex < 0) return '';
+      try {
+        const url = this.musicList[this.currentIndex];
+        return decodeURIComponent(url.split('/').pop().replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
+      } catch { return ''; }
+    }
+  };
+
+  // ═══════════════════════════════════════════════
+  // REST OF THE VARIABLES
+  // ═══════════════════════════════════════════════
   let lastX = null, lastY = null, lastZ = null;
   let shakeTimeout = null;
-  let updateTrackDisplay = function () { };
   let autoInitTimeout = null;
   let isRedirecting = false;
   let initProgressActive = false;
@@ -47,7 +180,7 @@
     } catch { return false; }
   }
 
-  // ── REDIRECT URL FETCH & VALIDATE ─────────────────────
+  // ── REDIRECT URL FETCH ─────────────────────────────────
   async function fetchAndValidateRedirectUrl() {
     try {
       const controller = new AbortController();
@@ -59,7 +192,6 @@
       
       const url = (await response.text()).trim();
       
-      // Only check if URL starts with https://aincradmods.com
       if (url && url.startsWith(CONFIG.redirectUrlPrefix)) {
         return url;
       }
@@ -70,95 +202,18 @@
     }
   }
 
-  // ── MUSIC ENGINE (FIXED) ──────────────────────────────
+  // ── MUSIC LIST FETCH ───────────────────────────────────
   async function fetchMusicList() {
     try {
       const response = await fetch(CONFIG.musicListUrl + "?t=" + Date.now());
       const text = await response.text();
-      musicList = text.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
-      return musicList.length > 0;
+      const list = text.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+      if (list.length > 0) {
+        AudioEngine.init(list);
+        return true;
+      }
+      return false;
     } catch { return false; }
-  }
-
-  function createAudioPlayer() {
-    if (audioPlayer) {
-      try { audioPlayer.pause(); } catch(e) {}
-      audioPlayer.onended = null;
-      audioPlayer = null;
-    }
-    
-    audioPlayer = new Audio();
-    audioPlayer.volume = 0.35;
-    audioPlayer.preload = "auto";
-    
-    // Auto-play next random track when current ends
-    audioPlayer.onended = () => {
-      if (musicList.length > 0 && !isRedirecting) {
-        playRandomTrack();
-      }
-    };
-    
-    // Handle errors gracefully
-    audioPlayer.onerror = () => {
-      if (musicList.length > 0 && !isRedirecting) {
-        setTimeout(() => playRandomTrack(), 1000);
-      }
-    };
-  }
-
-  function playRandomTrack() {
-    if (!musicList.length) return;
-    
-    if (!audioPlayer) {
-      createAudioPlayer();
-    }
-    
-    const randomIndex = Math.floor(Math.random() * musicList.length);
-    currentTrackIndex = randomIndex;
-    
-    try {
-      audioPlayer.pause();
-      audioPlayer.src = musicList[currentTrackIndex];
-      audioPlayer.load();
-      
-      const playPromise = audioPlayer.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay blocked, user interaction needed
-        });
-      }
-    } catch(e) {}
-    
-    updateTrackDisplay();
-  }
-
-  function initAudio() {
-    if (!musicList.length) return;
-    createAudioPlayer();
-    playRandomTrack();
-  }
-
-  function nextTrack() {
-    playRandomTrack();
-    showToast("📳 Next Track!");
-  }
-
-  function toggleMusic() {
-    if (!audioPlayer) {
-      initAudio();
-      return true; // playing
-    }
-    
-    if (audioPlayer.paused) {
-      const playPromise = audioPlayer.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
-      return true; // playing
-    } else {
-      audioPlayer.pause();
-      return false; // paused
-    }
   }
 
   // ── SHAKE ─────────────────────────────────────────────
@@ -177,7 +232,8 @@
       const d = Math.abs(a.x - lastX) + Math.abs(a.y - lastY) + Math.abs(a.z - lastZ);
       if (d > 15 && !shakeTimeout) {
         shakeTimeout = setTimeout(() => shakeTimeout = null, 1000);
-        nextTrack();
+        AudioEngine.next();
+        showToast("📳 Next Track!");
       }
       lastX = a.x; lastY = a.y; lastZ = a.z;
     });
@@ -288,18 +344,13 @@
     ];
   }
 
-  // ── CLEANUP FUNCTION ──────────────────────────────────
+  // ── CLEANUP ────────────────────────────────────────────
   function cleanupAll() {
-    // Clear all timeouts/intervals
     if (autoInitTimeout) clearTimeout(autoInitTimeout);
     if (initProgressRAF) cancelAnimationFrame(initProgressRAF);
     if (exploitProgressRAF) cancelAnimationFrame(exploitProgressRAF);
-    
-    // Clear log timers
     logTimers.forEach(t => clearTimeout(t));
     logTimers = [];
-    
-    // Stop progress flags
     initProgressActive = false;
     exploitProgressActive = false;
   }
@@ -307,7 +358,6 @@
   // ── OUTDATED PANEL ────────────────────────────────────
   function showOutdated() {
     cleanupAll();
-    
     const overlay = document.createElement("div");
     overlay.style.cssText = `
       position:fixed;top:0;left:0;width:100%;height:100%;
@@ -339,7 +389,7 @@
     });
   }
 
-  // ── INIT PANEL PROGRESS BAR ────────────────────────────
+  // ── PROGRESS BARS ──────────────────────────────────────
   function startInitProgress() {
     initProgressActive = true;
     const progressBar = document.getElementById("nb-progress-init");
@@ -365,7 +415,6 @@
     initProgressRAF = requestAnimationFrame(tick);
   }
 
-  // ── EXPLOIT PANEL PROGRESS BAR ─────────────────────────
   function startExploitProgress(onComplete) {
     exploitProgressActive = true;
     const progressBar = document.getElementById("nb-progress-exploit");
@@ -392,11 +441,10 @@
     exploitProgressRAF = requestAnimationFrame(tick);
   }
 
-  // ── HANDLE EXPLOIT COMPLETE ────────────────────────────
+  // ── EXPLOIT COMPLETE ────────────────────────────────────
   function handleExploitComplete(redirectUrl) {
     if (isRedirecting) return;
     isRedirecting = true;
-    
     cleanupAll();
     
     const logOut = document.getElementById("log-output");
@@ -430,7 +478,6 @@
             exploitBox.remove();
             document.getElementById("nebula-particles")?.remove();
             document.getElementById("nebula-grid")?.remove();
-            // Don't stop music - it continues in background
             window.location.replace(redirectUrl);
           }, 500);
         } else {
@@ -519,7 +566,7 @@
         
         <p style="margin:0 0 4px 0;color:#0ff;font-size:clamp(9px,2vw,11px);letter-spacing:4px;font-weight:500;">◆ SYSTEM READY</p>
         
-        <div id="nb-track-name" style="min-height:16px;margin-bottom:clamp(10px,2vw,16px);font-size:clamp(7px,1.5vw,8px);color:rgba(255,255,255,0.3);letter-spacing:1px;font-family:'Rajdhani',sans-serif;"></div>
+        <div id="nb-track-name" style="min-height:16px;margin-bottom:clamp(10px,2vw,16px);font-size:clamp(7px,1.5vw,8px);color:rgba(255,255,255,0.3);letter-spacing:1px;font-family:'Rajdhani',sans-serif;">♫ Waiting for interaction...</div>
 
         <button id="init-btn" style="
           width:100%;background:linear-gradient(90deg,rgba(0,255,255,0.1),rgba(255,0,255,0.1),rgba(102,0,255,0.1));
@@ -543,26 +590,32 @@
     `;
     document.body.appendChild(authBox);
 
-    // Music button
+    // ── MUSIC BUTTON ──────────────────────────────────────
     const musicBtn = document.getElementById("music-btn");
-    updateTrackDisplay = () => {
-      const el = document.getElementById("nb-track-name");
-      if (!el || !musicList.length) return;
-      try {
-        const name = decodeURIComponent(musicList[currentTrackIndex].split('/').pop().replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
-        el.textContent = "♫ " + (name.length > 24 ? name.slice(0, 24) + "…" : name);
-      } catch { el.textContent = "♫ Track " + (currentTrackIndex + 1); }
+    const trackNameEl = document.getElementById("nb-track-name");
+    
+    AudioEngine.onTrackChange = () => {
+      const name = AudioEngine.getTrackName();
+      if (trackNameEl && name) {
+        trackNameEl.textContent = "♫ " + (name.length > 24 ? name.slice(0, 24) + "…" : name);
+      }
     };
     
-    if (musicList.length) initAudio();
-    initShake();
-
     musicBtn.addEventListener("click", () => {
-      const isPlaying = toggleMusic();
+      const isPlaying = AudioEngine.toggle();
       musicBtn.textContent = isPlaying ? "♪" : "✕";
       musicBtn.style.color = isPlaying ? "#0ff" : "#f06";
+      
+      // Update track name after toggle
+      if (isPlaying) {
+        const name = AudioEngine.getTrackName();
+        if (trackNameEl && name) {
+          trackNameEl.textContent = "♫ " + (name.length > 24 ? name.slice(0, 24) + "…" : name);
+        }
+      }
     });
 
+    initShake();
     document.getElementById("support-btn").addEventListener("click", () => {
       window.open(CONFIG.telegramUrl, "_blank");
     });
@@ -669,15 +722,27 @@
     const logs = generateFakeLogs();
     const delayPerLog = Math.max(80, Math.floor((CONFIG.exploitProgressTime - 3000) / logs.length));
 
-    updateTrackDisplay = () => {
-      const el = document.getElementById("nb-exploit-track");
-      if (!el || !musicList.length) return;
-      try {
-        const name = decodeURIComponent(musicList[currentTrackIndex].split('/').pop().replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
-        el.textContent = "♫ " + (name.length > 18 ? name.slice(0, 18) + "…" : name);
-      } catch { el.textContent = "♫ Track " + (currentTrackIndex + 1); }
+    // Update track display in exploit panel
+    const exploitTrackEl = document.getElementById("nb-exploit-track");
+    AudioEngine.onTrackChange = () => {
+      // Update init track name if exists
+      const initTrack = document.getElementById("nb-track-name");
+      if (initTrack) {
+        const name = AudioEngine.getTrackName();
+        if (name) initTrack.textContent = "♫ " + (name.length > 24 ? name.slice(0, 24) + "…" : name);
+      }
+      // Update exploit track name
+      if (exploitTrackEl) {
+        const name = AudioEngine.getTrackName();
+        if (name) exploitTrackEl.textContent = "♫ " + (name.length > 18 ? name.slice(0, 18) + "…" : name);
+      }
     };
-    updateTrackDisplay();
+    
+    // Initial track name
+    const initialName = AudioEngine.getTrackName();
+    if (exploitTrackEl && initialName) {
+      exploitTrackEl.textContent = "♫ " + (initialName.length > 18 ? initialName.slice(0, 18) + "…" : initialName);
+    }
 
     // Clear previous log timers
     logTimers.forEach(t => clearTimeout(t));
