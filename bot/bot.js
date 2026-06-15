@@ -1,18 +1,15 @@
 // ╔══════════════════════════════════════════════╗
 // ║  NEBULA USER MANAGER BOT                   ║
 // ║  AUTHOR: Abdullah Al Mamun (@A2MBD3)       ║
-// ║  VERSION: 1.0.0 - FULL BOT                 ║
 // ╚══════════════════════════════════════════════╝
 
 const express = require('express');
 const fetch = require('node-fetch');
+const { Buffer } = require('buffer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ═══════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const ADMIN_IDS = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim());
@@ -39,18 +36,25 @@ const ghHeaders = {
 
 async function getUsers() {
   const res = await fetch(GH_API + '?t=' + Date.now(), { headers: ghHeaders });
-  if (!res.ok) throw new Error('GitHub fetch failed');
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`GitHub Error ${res.status}: ${err}`);
+  }
   const data = await res.json();
+  const content = data.content;
+  const decoded = Buffer.from(content, 'base64').toString('utf8');
+  const json = JSON.parse(decoded);
   return {
-    users: JSON.parse(Buffer.from(data.content, 'base64').toString()).users || [],
+    users: json.users || [],
     sha: data.sha
   };
 }
 
 async function saveUsers(users, sha, msg) {
+  const content = JSON.stringify({ users }, null, 2);
   const body = {
     message: `🤖 ${msg} [via NEBULA Bot]`,
-    content: Buffer.from(JSON.stringify({ users }, null, 2)).toString('base64'),
+    content: Buffer.from(content).toString('base64'),
     sha: sha
   };
   const res = await fetch(GH_API, {
@@ -58,7 +62,11 @@ async function saveUsers(users, sha, msg) {
     headers: { ...ghHeaders, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  return res.ok;
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`GitHub Write Error ${res.status}: ${err}`);
+  }
+  return true;
 }
 
 // ═══════════════════════════════════════════════
@@ -71,7 +79,14 @@ async function sendMessage(chatId, text) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
     });
-  } catch (e) {}
+  } catch (e) {
+    console.error('Send Error:', e.message);
+  }
+}
+
+async function replyError(chatId, cmd, error) {
+  console.error(`Command ${cmd} Error:`, error.message);
+  sendMessage(chatId, `❌ <b>Error!</b>\n\n<code>${error.message}</code>`);
 }
 
 // ═══════════════════════════════════════════════
@@ -79,7 +94,7 @@ async function sendMessage(chatId, text) {
 // ═══════════════════════════════════════════════
 async function handleUpdate(update) {
   if (!update.message) return;
-  const { chat, text, from } = update.message;
+  const { chat, text } = update.message;
   const chatId = chat.id;
   const parts = text.split(' ');
   const cmd = parts[0].toLowerCase();
@@ -108,8 +123,6 @@ async function handleUpdate(update) {
           '/ban [id]\n' +
           '/unban [id]\n' +
           '/delete [id]\n\n' +
-          '<b>📝 Example:</b>\n' +
-          '<code>/add 5,New User,t.me/test,0,0</code>\n\n' +
           '<i>By Abdullah Al Mamun | @A2MBD3</i>'
         );
         break;
@@ -121,67 +134,24 @@ async function handleUpdate(update) {
           list += `${u.banned ? '🚫' : '✅'} <b>ID:${u.id}</b> ${u.name}\n`;
           list += `   🔑:${u.password === '0' ? 'No' : 'Yes'} | 📢:${u.tgChannel === '0' ? 'None' : u.tgChannel}\n\n`;
         });
-        list += `<i>Total: ${users.length} users</i>`;
+        list += `<i>Total: ${users.length}</i>`;
         sendMessage(chatId, list);
-        break;
-      }
-      
-      case '/find': {
-        const id = parseInt(args[0]);
-        if (!id) return sendMessage(chatId, '❌ Usage: <code>/find [id]</code>');
-        const { users } = await getUsers();
-        const u = users.find(x => x.id === id);
-        if (u) {
-          sendMessage(chatId,
-            `<b>👤 USER #${u.id}</b>\n\n` +
-            `📛 Name: ${u.name}\n` +
-            `📢 Channel: ${u.tgChannel}\n` +
-            `🔑 Password: ${u.password}\n` +
-            `🚫 Banned: ${u.banned ? 'Yes' : 'No'}`
-          );
-        } else {
-          sendMessage(chatId, '❌ User not found!');
-        }
-        break;
-      }
-      
-      case '/active': {
-        const active = (await getUsers()).users.filter(u => !u.banned);
-        let txt = `<b>✅ ACTIVE USERS (${active.length})</b>\n\n`;
-        active.forEach(u => txt += `• <b>ID:${u.id}</b> ${u.name}\n`);
-        sendMessage(chatId, txt || 'No active users');
-        break;
-      }
-      
-      case '/banned': {
-        const banned = (await getUsers()).users.filter(u => u.banned);
-        let txt = `<b>🚫 BANNED USERS (${banned.length})</b>\n\n`;
-        banned.forEach(u => txt += `• <b>ID:${u.id}</b> ${u.name}\n`);
-        sendMessage(chatId, txt || '✅ No banned users!');
         break;
       }
       
       case '/stats': {
         const all = (await getUsers()).users;
-        const total = all.length;
-        const active = all.filter(u => !u.banned).length;
-        const banned = all.filter(u => u.banned).length;
-        const withPass = all.filter(u => u.password !== '0').length;
-        const withCh = all.filter(u => u.tgChannel !== '0').length;
         sendMessage(chatId,
-          '<b>📊 NEBULA STATISTICS</b>\n\n' +
-          `👥 Total Users: <b>${total}</b>\n` +
-          `✅ Active: <b>${active}</b>\n` +
-          `🚫 Banned: <b>${banned}</b>\n` +
-          `🔑 With Password: <b>${withPass}</b>\n` +
-          `📢 With Channel: <b>${withCh}</b>\n\n` +
-          '<i>By @A2MBD3</i>'
+          '<b>📊 STATS</b>\n\n' +
+          `👥 Total: ${all.length}\n` +
+          `✅ Active: ${all.filter(u => !u.banned).length}\n` +
+          `🚫 Banned: ${all.filter(u => u.banned).length}`
         );
         break;
       }
       
       case '/add': {
-        if (args.length < 5) return sendMessage(chatId, '❌ Format: <code>/add id,name,channel,password,banned</code>');
+        if (args.length < 5) return sendMessage(chatId, '❌ Format: /add id,name,channel,password,banned');
         const { users, sha } = await getUsers();
         const newUser = {
           id: parseInt(args[0]),
@@ -191,20 +161,19 @@ async function handleUpdate(update) {
           banned: parseInt(args[4])
         };
         if (users.find(u => u.id === newUser.id)) {
-          return sendMessage(chatId, `❌ ID ${newUser.id} already exists! Use /edit`);
+          return sendMessage(chatId, `❌ ID ${newUser.id} exists! Use /edit`);
         }
         users.push(newUser);
-        const ok = await saveUsers(users, sha, `Add user ${newUser.name} (ID:${newUser.id})`);
-        sendMessage(chatId, ok ? `✅ <b>${newUser.name}</b> added!` : '❌ Failed!');
+        await saveUsers(users, sha, `Add ${newUser.name}`);
+        sendMessage(chatId, `✅ Added: <b>${newUser.name}</b>`);
         break;
       }
       
       case '/edit': {
-        if (args.length < 5) return sendMessage(chatId, '❌ Format: <code>/edit id,name,channel,password,banned</code>');
+        if (args.length < 5) return sendMessage(chatId, '❌ Format: /edit id,name,channel,password,banned');
         const { users, sha } = await getUsers();
         const idx = users.findIndex(u => u.id === parseInt(args[0]));
         if (idx === -1) return sendMessage(chatId, '❌ User not found!');
-        const oldName = users[idx].name;
         users[idx] = {
           id: parseInt(args[0]),
           name: args[1],
@@ -212,45 +181,45 @@ async function handleUpdate(update) {
           password: args[3],
           banned: parseInt(args[4])
         };
-        const ok = await saveUsers(users, sha, `Edit ${oldName} → ${args[1]} (ID:${args[0]})`);
-        sendMessage(chatId, ok ? `✅ Updated: <b>${args[1]}</b>` : '❌ Failed!');
+        await saveUsers(users, sha, `Edit ${args[1]}`);
+        sendMessage(chatId, `✅ Updated: <b>${args[1]}</b>`);
         break;
       }
       
       case '/ban': {
         const id = parseInt(args[0]);
-        if (!id) return sendMessage(chatId, '❌ Usage: <code>/ban [id]</code>');
+        if (!id) return sendMessage(chatId, '❌ Usage: /ban [id]');
         const { users, sha } = await getUsers();
         const u = users.find(x => x.id === id);
         if (!u) return sendMessage(chatId, '❌ User not found!');
         u.banned = 1;
-        const ok = await saveUsers(users, sha, `Ban ${u.name} (ID:${id})`);
-        sendMessage(chatId, ok ? `🚫 <b>${u.name}</b> banned!` : '❌ Failed!');
+        await saveUsers(users, sha, `Ban ${u.name}`);
+        sendMessage(chatId, `🚫 Banned: <b>${u.name}</b>`);
         break;
       }
       
       case '/unban': {
         const id = parseInt(args[0]);
-        if (!id) return sendMessage(chatId, '❌ Usage: <code>/unban [id]</code>');
+        if (!id) return sendMessage(chatId, '❌ Usage: /unban [id]');
         const { users, sha } = await getUsers();
         const u = users.find(x => x.id === id);
         if (!u) return sendMessage(chatId, '❌ User not found!');
         u.banned = 0;
-        const ok = await saveUsers(users, sha, `Unban ${u.name} (ID:${id})`);
-        sendMessage(chatId, ok ? `✅ <b>${u.name}</b> unbanned!` : '❌ Failed!');
+        await saveUsers(users, sha, `Unban ${u.name}`);
+        sendMessage(chatId, `✅ Unbanned: <b>${u.name}</b>`);
         break;
       }
       
       case '/delete': {
         const id = parseInt(args[0]);
-        if (!id) return sendMessage(chatId, '❌ Usage: <code>/delete [id]</code>');
+        if (!id) return sendMessage(chatId, '❌ Usage: /delete [id]');
         const { users, sha } = await getUsers();
         const idx = users.findIndex(u => u.id === id);
         if (idx === -1) return sendMessage(chatId, '❌ User not found!');
         const name = users[idx].name;
         users.splice(idx, 1);
-        const ok = await saveUsers(users, sha, `Delete ${name} (ID:${id})`);
-        sendMessage(chatId, ok ? `🗑 <b>${name}</b> deleted!` : '❌ Failed!');
+        await saveUsers(users, sha, `Delete ${name}`);
+        sendMessage(chatId, `🗑 Deleted: <b>${name}</b>`);
         break;
       }
       
@@ -258,8 +227,7 @@ async function handleUpdate(update) {
         sendMessage(chatId, '❌ Unknown command. Use /start');
     }
   } catch (e) {
-    sendMessage(chatId, '❌ Error! Check logs.');
-    console.error(e);
+    replyError(chatId, cmd, e);
   }
 }
 
@@ -277,7 +245,9 @@ async function poll() {
         await handleUpdate(update);
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('Poll Error:', e.message);
+  }
   poll();
 }
 
@@ -286,5 +256,8 @@ async function poll() {
 // ═══════════════════════════════════════════════
 app.listen(PORT, () => {
   console.log(`⬡ NEBULA Bot v1.0 | Port: ${PORT} | @A2MBD3`);
+  console.log('✅ GitHub Token:', GITHUB_TOKEN ? 'SET' : 'MISSING!');
+  console.log('✅ Bot Token:', TOKEN ? 'SET' : 'MISSING!');
+  console.log('✅ Admin IDs:', ADMIN_IDS.join(','));
   poll();
 });
