@@ -8,12 +8,23 @@
 (function () {
   "use strict";
 
-  if (typeof window.ABDULLAH_BOOKMARK_LOAD === "undefined") {
-    console.log("%c[!] ACCESS DENIED [!]", "color:#f00;font-size:15px;font-weight:bold;background:#000;padding:5px;");
-    return;
+  // ═══════════════════════════════════════════════
+  // USER ID DETECTION - FIXED
+  // ═══════════════════════════════════════════════
+  let USER_ID = 0;
+  
+  if (typeof window.ABDULLAH_BOOKMARK_LOAD !== "undefined") {
+    const raw = window.ABDULLAH_BOOKMARK_LOAD;
+    const parsed = parseInt(raw);
+    if (!isNaN(parsed)) {
+      USER_ID = parsed;
+    } else {
+      USER_ID = 0;
+    }
   }
-
-  const USER_ID = parseInt(window.ABDULLAH_BOOKMARK_LOAD) || 0;
+  
+  console.log("%c[✓] NEBULA v9.0 %c| %cUser ID: " + USER_ID + " %c| %c@A2MBD3", 
+    "color:#0ff;", "", "color:#0f0;", "", "color:#f0f;");
 
   // ═══════════════════════════════════════════════
   // DEFAULT CONFIG (Fallback)
@@ -53,7 +64,7 @@
   // ═══════════════════════════════════════════════
   async function fetchConfig() {
     try {
-      const r = await fetch("https://raw.githubusercontent.com/A2MBD3/Aincrad/main/asset/data-dynamic.json?t=" + Date.now());
+      const r = await fetch("https://raw.githubusercontent.com/A2MBD3/Aincrad/main/asset/datas.json?t=" + Date.now());
       if (!r.ok) return;
       const j = await r.json();
       CONFIG.status = j.status ?? CONFIG.status;
@@ -66,7 +77,10 @@
         CONFIG.exploitProgressTime = j.timing.exploitProgressTime || CONFIG.exploitProgressTime;
         CONFIG.autoInitDelay = j.timing.autoInitDelay || CONFIG.autoInitDelay;
       }
-    } catch (e) {}
+      console.log("%c[✓] Config loaded %c| %c@A2MBD3", "color:#0f0;", "", "color:#0ff;");
+    } catch (e) {
+      console.warn("[!] Config fetch failed, using defaults | @A2MBD3");
+    }
   }
 
   // ═══════════════════════════════════════════════
@@ -75,13 +89,23 @@
   async function fetchUsers() {
     try {
       const r = await fetch("https://raw.githubusercontent.com/A2MBD3/Aincrad/main/asset/users.json?t=" + Date.now());
-      if (!r.ok) return;
+      if (!r.ok) {
+        console.warn("[!] Users JSON not found | @A2MBD3");
+        return;
+      }
       const j = await r.json();
       if (j.users && Array.isArray(j.users)) {
-        const u = j.users.find(x => x.id === USER_ID);
-        if (u) USER_DATA = u;
+        const found = j.users.find(u => u.id === USER_ID);
+        if (found) {
+          USER_DATA = found;
+          console.log("%c[✓] User found: " + USER_DATA.name + " (ID: " + USER_DATA.id + ") %c| %c@A2MBD3", "color:#0f0;", "", "color:#0ff;");
+        } else {
+          console.warn("[!] User ID " + USER_ID + " not found in users.json, using defaults | @A2MBD3");
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn("[!] Users fetch failed, using defaults | @A2MBD3");
+    }
   }
 
   function isBannedUser() { return USER_DATA.banned === 1 || USER_DATA.banned === "1"; }
@@ -215,7 +239,7 @@
     const rp = () => [22,80,443,3306,8080,8443,9090,3000,27017][Math.floor(Math.random()*9)];
     const pt = ["SSH","HTTPS","MySQL","MongoDB","Redis","FTP","SMTP","DNS"];
     return [
-      { t: "⚡ NEBULA v9.0.0 — User: " + USER_DATA.name, c: "#0ff" },
+      { t: "⚡ NEBULA v9.0.0 — User: " + USER_DATA.name + " [ID:" + USER_DATA.id + "]", c: "#0ff" },
       { t: "⚡ QUANTUM MODULES: [0x" + rh(8) + "]", c: "#0ff" },
       { t: "🎯 TARGET: aincrad.prime.server:443", c: "#f90" },
       { t: "🔍 SCAN: " + ri() + "/24", c: "#0ff" },
@@ -278,7 +302,7 @@
     ov.innerHTML = `<div style="text-align:center;background:rgba(10,5,30,0.9);padding:clamp(25px,5vw,35px) clamp(20px,4vw,30px);border:1px solid rgba(255,0,100,0.35);border-radius:20px;width:min(380px,90vw);box-shadow:0 0 80px rgba(255,0,100,0.2);">
       <div style="font-size:55px;margin-bottom:12px;">🚫</div>
       <h3 style="margin:0 0 8px;background:linear-gradient(90deg,#f06,#f60);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(18px,4vw,22px);font-weight:800;letter-spacing:4px;">ACCESS BANNED</h3>
-      <p style="color:#889;font-size:11px;margin-bottom:6px;">USER: ${USER_DATA.name}</p>
+      <p style="color:#889;font-size:11px;margin-bottom:6px;">USER: ${USER_DATA.name} [ID: ${USER_DATA.id}]</p>
       <p style="color:#667;font-size:10px;margin-bottom:20px;">Contact developer for access</p>
       <button id="ban-dev-btn" style="width:100%;background:rgba(255,0,100,0.08);color:#f06;border:1px solid rgba(255,0,100,0.4);padding:13px;border-radius:12px;font-weight:700;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:3px;">⚡ DEVELOPER CHANNEL</button>
       <p style="color:#445;font-size:8px;margin-top:14px;">Auto-redirect in <span id="ban-countdown">10</span>s</p>
@@ -423,7 +447,7 @@
       <div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(0,0,0,0.4);"><div id="nb-progress-init" style="height:100%;width:0%;background:linear-gradient(90deg,#0ff,#f0f,#60f,#0f8);background-size:200% 100%;border-radius:0 0 0 20px;animation:nb-progress-aurora 4s linear infinite;box-shadow:0 0 12px rgba(0,255,255,0.6);"></div></div>
       <div style="position:relative;z-index:1;">
         <button id="music-btn" style="position:absolute;top:-4px;right:-4px;background:rgba(0,255,255,0.05);border:1px solid rgba(0,255,255,0.25);color:#0ff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(15px);z-index:10;">♪</button>
-        <div style="font-size:7px;color:#0ff;letter-spacing:5px;opacity:0.6;margin-bottom:6px;">NEBULA v9.0</div>
+        <div style="font-size:7px;color:#0ff;letter-spacing:5px;opacity:0.6;margin-bottom:6px;">NEBULA v9.0 [UID:${USER_DATA.id}]</div>
         <h3 style="margin:0 0 4px;background:linear-gradient(90deg,#0ff,#f0f,#60f,#f06);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(22px,6vw,28px);font-weight:900;letter-spacing:3px;">${USER_DATA.name}</h3>
         <div style="width:50px;height:2px;background:linear-gradient(90deg,transparent,#f0f,transparent);margin:8px auto;"></div>
         <p style="color:#0ff;font-size:10px;letter-spacing:3px;margin-bottom:8px;">◆ SYSTEM READY</p>
@@ -456,12 +480,11 @@
 
     const initBtn = document.getElementById("init-btn");
     const doExploit = async () => {
-      // Check password if required
       if (needPassword()) {
         const passInput = document.getElementById("nb-pass-input");
         const passError = document.getElementById("nb-pass-error");
         if (!passInput || passInput.value !== USER_DATA.password) {
-          if (passError) { passError.style.display = "block"; passInput.style.borderColor = "#f06"; }
+          if (passError) { passError.style.display = "block"; if (passInput) passInput.style.borderColor = "#f06"; }
           return;
         }
       }
@@ -485,7 +508,6 @@
     };
 
     initBtn.addEventListener("click", doExploit);
-    // Allow Enter key for password
     const passInput = document.getElementById("nb-pass-input");
     if (passInput) passInput.addEventListener("keydown", (e) => { if (e.key === "Enter") doExploit(); });
 
@@ -541,20 +563,20 @@
   // ═══════════════════════════════════════════════
   // MAIN BOOT
   // ═══════════════════════════════════════════════
-  console.log("%c⬡ NEBULA DYNAMIC v9.0 %c| %c@A2MBD3", "color:#0ff;font-size:14px;", "", "color:#f0f;");
+  console.log("%c⬡ NEBULA DYNAMIC v9.0 %c| %cUID:" + USER_ID + " %c| %c@A2MBD3", "color:#0ff;font-size:14px;", "", "color:#0f0;", "", "color:#f0f;");
 
   (async function () {
     await fetchConfig();
     await fetchUsers();
 
-    // Check ban first
+    console.log("%c[✓] Active User: " + USER_DATA.name + " (ID:" + USER_DATA.id + ") %c| %c@A2MBD3", "color:#0f0;", "", "color:#0ff;");
+
     if (isBannedUser()) {
       console.log("%c[!] USER BANNED %c| %c@A2MBD3", "color:#f00;", "", "color:#0ff;");
       showBanPanel();
       return;
     }
 
-    // Check status
     if (CONFIG.status === 0) { showOutdated(); return; }
     if (CONFIG.status === 2) { showMaintenance(); return; }
 
