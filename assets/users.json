@@ -69,7 +69,8 @@
       "password": "1",
       "tgChannel": "0",
       "creator": "soloXvex",
-      "banned": 0
+      "banned": 0,
+      "chatId": 5883825451
     }
   ]
 }
