@@ -14,7 +14,7 @@ const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const ADMIN_IDS = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim());
 const REPO = 'A2MBD3/Aincrad';
-const FILE_PATH = 'asset/users.json';
+const FILE_PATH = 'assets/users.json';
 const API = `https://api.telegram.org/bot${TOKEN}`;
 const GH_API = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
 
