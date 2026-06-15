@@ -21,6 +21,14 @@
       "tgChannel": "https://t.me/+LtLgiygbp9FlNDI1",
       "creator": "Raselrana1234",
       "banned": 0
+    },
+    {
+      "id": 3,
+      "name": "Solo Vex",
+      "password": "0",
+      "tgChannel": "t.me/phantomsect",
+      "creator": "soloXvex",
+      "banned": 0
     }
   ]
 }
