@@ -30,6 +30,16 @@
       "creator": "soloXvex",
       "banned": 0,
       "chatId": 5883825451
+    },
+    {
+      "id": 4,
+      "name": "My Hinata",
+      "password": "Hinata",
+      "tgChannel": "0",
+      "creator": "",
+      "banned": 0,
+      "chatId": 8709077024,
+      "createdAt": "2026-06-15T17:31:44.784Z"
     }
   ]
 }
