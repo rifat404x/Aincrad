@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: nebula-bot
+    env: node
+    region: singapore
+    plan: free
+    rootDir: bot
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: ADMIN_IDS
+        sync: false
