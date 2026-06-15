@@ -30,6 +30,14 @@
       "creator": "soloXvex",
       "banned": 0,
       "chatId": 5883825451
+    },
+    {
+      "id": 4,
+      "name": "/start",
+      "password": "/start",
+      "tgChannel": "/start",
+      "creator": "soloXvex",
+      "banned": 0
     }
   ]
 }
