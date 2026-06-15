@@ -11,7 +11,7 @@
   "timing": {
     "initProgressTime": 10000,
     "exploitProgressTime": 20000,
-    "autoInitDelay": 20000
+    "autoInitDelay": 13000
   },
   "audio": {
     "volume": 0.35
