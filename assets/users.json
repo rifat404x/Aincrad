@@ -34,15 +34,6 @@
       "password": "6503300",
       "tgChannel": "none",
       "banned": 0
-    },
-    {
-      "id": 9,
-      "name": "System Compromised",
-      "password": "1",
-      "tgChannel": "0",
-      "creator": "soloXvex",
-      "banned": 0,
-      "chatId": 5883825451
     }
   ]
 }
