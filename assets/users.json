@@ -27,6 +27,13 @@
       "password": "1",
       "tgChannel": "0",
       "banned": 0
+    },
+    {
+      "id": 4,
+      "name": "হোগার নাতি",
+      "password": "0",
+      "tgChannel": "0",
+      "banned": 0
     }
   ]
 }
