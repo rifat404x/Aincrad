@@ -43,6 +43,16 @@
       "chatId": 8709077024,
       "createdAt": "2026-06-15T17:56:06.040Z",
       "lastSeen": "2026-06-15T18:36:27.838Z"
+    },
+    {
+      "id": 6,
+      "name": "Abdullah",
+      "password": "0",
+      "tgChannel": "0",
+      "creator": "a2mbd3",
+      "banned": 0,
+      "chatId": 8074495633,
+      "createdAt": "2026-06-15T21:02:42.735Z"
     }
   ]
 }
