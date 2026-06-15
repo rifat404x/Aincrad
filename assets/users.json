@@ -13,6 +13,14 @@
       "tgChannel": "0",
       "password": "0",
       "banned": 0
+    },
+    {
+      "id": 2,
+      "name": "𝑹𝒂𝒔𝒆𝒍 𝑹𝒂𝒏𝒂",
+      "password": "6503300145",
+      "tgChannel": "https://t.me/+LtLgiygbp9FlNDI1",
+      "creator": "Raselrana1234",
+      "banned": 0
     }
   ]
 }
