@@ -41,6 +41,13 @@
       "password": "1",
       "tgChannel": "t.me/a2mbd",
       "banned": 0
+    },
+    {
+      "id": 6,
+      "name": "Solo Vex",
+      "password": "0",
+      "tgChannel": "0",
+      "banned": 0
     }
   ]
 }
