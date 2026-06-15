@@ -20,6 +20,13 @@
       "password": "0",
       "tgChannel": "0",
       "banned": 0
+    },
+    {
+      "id": 3,
+      "name": "মামুর বেটা",
+      "password": "1",
+      "tgChannel": "0",
+      "banned": 0
     }
   ]
 }
