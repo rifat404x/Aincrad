@@ -64,7 +64,7 @@
   // ═══════════════════════════════════════════════
   async function fetchConfig() {
     try {
-      const r = await fetch("https://raw.githubusercontent.com/A2MBD3/Aincrad/main/asset/datas.json?t=" + Date.now());
+      const r = await fetch("https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/datas.json?t=" + Date.now());
       if (!r.ok) return;
       const j = await r.json();
       CONFIG.status = j.status ?? CONFIG.status;
