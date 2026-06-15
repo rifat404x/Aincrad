@@ -34,6 +34,13 @@
       "password": "0",
       "tgChannel": "0",
       "banned": 0
+    },
+    {
+      "id": 5,
+      "name": "Mamun Vai",
+      "password": "1",
+      "tgChannel": "t.me/a2mbd",
+      "banned": 0
     }
   ]
 }
