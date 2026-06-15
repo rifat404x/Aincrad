@@ -48,6 +48,13 @@
       "password": "0",
       "tgChannel": "0",
       "banned": 0
+    },
+    {
+      "id": 7,
+      "name": "সিস্টেম হ্যাকার",
+      "password": "69",
+      "tgChannel": "8",
+      "banned": 0
     }
   ]
 }
