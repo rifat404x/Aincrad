@@ -88,7 +88,7 @@
   // ═══════════════════════════════════════════════
   async function fetchUsers() {
     try {
-      const r = await fetch("https://raw.githubusercontent.com/A2MBD3/Aincrad/main/asset/users.json?t=" + Date.now());
+      const r = await fetch("https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/users.json?t=" + Date.now());
       if (!r.ok) {
         console.warn("[!] Users JSON not found | @A2MBD3");
         return;
