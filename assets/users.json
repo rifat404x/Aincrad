@@ -27,6 +27,13 @@
       "tgChannel": "0",
       "password": "0",
       "banned": 0
+    },
+    {
+      "id": 4,
+      "name": "লুলি ভূত",
+      "tgChannel": "0",
+      "password": "1",
+      "banned": 0
     }
   ]
 }
