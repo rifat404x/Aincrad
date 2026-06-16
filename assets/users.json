@@ -155,6 +155,16 @@
       "banned": 0,
       "chatId": 875489865,
       "createdAt": "2026-06-16T05:25:38.543Z"
+    },
+    {
+      "id": 17,
+      "name": "MRX",
+      "password": "mrx",
+      "tgChannel": "https://t.me/Mister_x_main",
+      "creator": "mister_x_bd",
+      "banned": 0,
+      "chatId": 7661098709,
+      "createdAt": "2026-06-16T05:29:32.223Z"
     }
   ]
 }
