@@ -115,6 +115,16 @@
       "banned": 0,
       "chatId": 6288490674,
       "createdAt": "2026-06-16T04:18:00.857Z"
+    },
+    {
+      "id": 13,
+      "name": "ᴋɪʀꫝㅤsɪʀ",
+      "password": "1234",
+      "tgChannel": "@mychanel",
+      "creator": "flicker_f4o",
+      "banned": 0,
+      "chatId": 8381528766,
+      "createdAt": "2026-06-16T04:35:18.002Z"
     }
   ]
 }
