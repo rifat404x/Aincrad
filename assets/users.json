@@ -105,6 +105,16 @@
       "banned": 0,
       "chatId": 5671674351,
       "createdAt": "2026-06-16T04:11:46.872Z"
+    },
+    {
+      "id": 12,
+      "name": "Sadhin hck",
+      "password": "sadhin121",
+      "tgChannel": "@free_hackbo1",
+      "creator": "free_hackbo1",
+      "banned": 0,
+      "chatId": 6288490674,
+      "createdAt": "2026-06-16T04:18:00.857Z"
     }
   ]
 }
