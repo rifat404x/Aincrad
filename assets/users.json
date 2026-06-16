@@ -85,6 +85,16 @@
       "banned": 0,
       "chatId": 8436433543,
       "createdAt": "2026-06-16T02:17:16.517Z"
+    },
+    {
+      "id": 10,
+      "name": "Nahiyan's Nebula",
+      "password": "9580255398",
+      "tgChannel": "@N777677",
+      "creator": "n777677",
+      "banned": 0,
+      "chatId": 8408911720,
+      "createdAt": "2026-06-16T03:57:26.906Z"
     }
   ]
 }
