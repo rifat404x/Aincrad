@@ -75,6 +75,16 @@
       "banned": 0,
       "chatId": 8074495633,
       "createdAt": "2026-06-16T01:27:08.374Z"
+    },
+    {
+      "id": 9,
+      "name": "Shivam",
+      "password": "Aura@123",
+      "tgChannel": "https://t.me/+9qZXHZj6gx42NWVl",
+      "creator": "shivamcheat",
+      "banned": 0,
+      "chatId": 8436433543,
+      "createdAt": "2026-06-16T02:17:16.517Z"
     }
   ]
 }
