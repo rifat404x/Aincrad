@@ -65,6 +65,16 @@
       "banned": 0,
       "chatId": 7425911725,
       "createdAt": "2026-06-16T00:28:48.033Z"
+    },
+    {
+      "id": 8,
+      "name": "Official hack",
+      "password": "Garena",
+      "tgChannel": "0",
+      "creator": "a2mbd3",
+      "banned": 0,
+      "chatId": 8074495633,
+      "createdAt": "2026-06-16T01:27:08.374Z"
     }
   ]
 }
