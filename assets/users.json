@@ -55,6 +55,16 @@
       "chatId": 8074495633,
       "createdAt": "2026-06-15T21:02:42.735Z",
       "lastSeen": "2026-06-15T23:04:10.313Z"
+    },
+    {
+      "id": 7,
+      "name": "ZxSU",
+      "password": "3339",
+      "tgChannel": "ZxSU",
+      "creator": "sabbir8753",
+      "banned": 0,
+      "chatId": 7425911725,
+      "createdAt": "2026-06-16T00:28:48.033Z"
     }
   ]
 }
