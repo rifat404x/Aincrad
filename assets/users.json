@@ -135,6 +135,16 @@
       "banned": 0,
       "chatId": 6776334925,
       "createdAt": "2026-06-16T05:10:20.050Z"
+    },
+    {
+      "id": 15,
+      "name": "SIS HEXA",
+      "password": "S2399",
+      "tgChannel": "/sishexa",
+      "creator": "imturza",
+      "banned": 0,
+      "chatId": 7326629985,
+      "createdAt": "2026-06-16T05:17:51.300Z"
     }
   ]
 }
