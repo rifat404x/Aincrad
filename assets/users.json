@@ -145,6 +145,16 @@
       "banned": 0,
       "chatId": 7326629985,
       "createdAt": "2026-06-16T05:17:51.300Z"
+    },
+    {
+      "id": 16,
+      "name": "ErrorX",
+      "password": "12345678@",
+      "tgChannel": "@ErrorX_BD",
+      "creator": "fakeerrorx",
+      "banned": 0,
+      "chatId": 875489865,
+      "createdAt": "2026-06-16T05:25:38.543Z"
     }
   ]
 }
