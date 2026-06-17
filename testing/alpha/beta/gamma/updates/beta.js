@@ -38,6 +38,7 @@
   let initProgressRAF = null, exploitProgressRAF = null;
   let logTimers = [], redirectUrlCache = null, isBanned = false;
   let selectedTarget = null, selectedTargetName = null;
+  let targetSelectionActive = false;
 
   async function fetchConfig() {
     try {
@@ -66,7 +67,12 @@
       const j = await r.json();
       if (j.users && Array.isArray(j.users)) {
         const found = j.users.find(u => u.id === USER_ID);
-        if (found) USER_DATA = found;
+        if (found) {
+          USER_DATA = found;
+          if (USER_DATA.password) {
+            USER_DATA.password = String(USER_DATA.password).trim().toLowerCase();
+          }
+        }
       }
     } catch (e) {}
   }
@@ -78,6 +84,13 @@
     const c = USER_DATA.tgChannel;
     if (!c || c === "0") return null;
     return c.startsWith("http") ? c : "https://" + c;
+  }
+
+  function checkPassword(input) {
+    if (!needPassword()) return true;
+    const cleanInput = input.replace(/\s/g, '').toLowerCase();
+    const cleanPass = USER_DATA.password.replace(/\s/g, '').toLowerCase();
+    return cleanInput === cleanPass;
   }
 
   async function fetchRedirectUrl(redirectFileUrl, redirectPrefix) {
@@ -297,7 +310,7 @@
       if (p >= 100) { 
         initProgressActive = false; 
         const b = document.getElementById("init-btn"); 
-        if (b && !b.disabled) b.click(); 
+        if (b && !b.disabled && !targetSelectionActive) b.click(); 
       }
       else initProgressRAF = requestAnimationFrame(tick);
     })();
@@ -358,15 +371,18 @@
     const existing = document.getElementById("target-selection");
     if (existing) existing.remove();
 
+    targetSelectionActive = true;
+    initProgressActive = false;
+    if (initProgressRAF) cancelAnimationFrame(initProgressRAF);
+
     const selection = document.createElement("div");
     selection.id = "target-selection";
     selection.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(160deg,rgba(5,3,20,0.98),rgba(10,5,30,0.98));backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:1.5px solid rgba(0,255,255,0.3);border-radius:20px;padding:clamp(20px,4vw,28px);z-index:2147483648;font-family:'Orbitron','Rajdhani',sans-serif;text-align:center;width:min(380px,90vw);box-sizing:border-box;animation:nebula-border 6s ease-in-out infinite,nebula-float 8s ease-in-out infinite;box-shadow:0 0 80px rgba(0,255,255,0.15);";
-    selection.innerHTML = '<div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);animation:nebula-scan 3s linear infinite;pointer-events:none;opacity:0.6;"></div><div style="position:relative;z-index:1;"><div style="font-size:7px;color:#0ff;letter-spacing:5px;opacity:0.6;margin-bottom:6px;">SELECT TARGET</div><h3 style="margin:0 0 15px;background:linear-gradient(90deg,#0ff,#f0f,#60f,#f06);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(16px,4vw,20px);font-weight:800;letter-spacing:3px;">TARGET SYSTEM</h3><div style="width:50px;height:2px;background:linear-gradient(90deg,transparent,#f0f,transparent);margin:0 auto 20px;"></div><button id="target-aincrad33" style="width:100%;background:linear-gradient(90deg,rgba(0,255,255,0.08),rgba(255,0,255,0.08));color:#fff;border:1.5px solid rgba(0,255,255,0.4);padding:15px;border-radius:12px;font-weight:700;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;margin-bottom:12px;backdrop-filter:blur(15px);text-transform:uppercase;transition:all 0.3s ease;position:relative;overflow:hidden;"><span style="position:relative;z-index:1;">⬡ AINCRAD 3.3</span><div style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,255,0.1),transparent);transition:left 0.5s;"></div></button><button id="target-aincrad-proxy" style="width:100%;background:linear-gradient(90deg,rgba(255,0,255,0.05),rgba(102,0,255,0.05));color:#fff;border:1.5px solid rgba(255,0,255,0.4);padding:15px;border-radius:12px;font-weight:700;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;margin-bottom:18px;backdrop-filter:blur(15px);text-transform:uppercase;transition:all 0.3s ease;position:relative;overflow:hidden;"><span style="position:relative;z-index:1;">⬡ AINCRAD PROXY</span><div style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,0,255,0.1),transparent);transition:left 0.5s;"></div></button><button id="target-back" style="width:100%;background:rgba(255,255,255,0.03);color:#889;border:1px solid rgba(255,255,255,0.15);padding:10px;border-radius:10px;font-weight:600;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:10px;letter-spacing:3px;backdrop-filter:blur(15px);transition:all 0.3s ease;">◂ BACK</button><div style="font-size:7px;color:#334;margin-top:12px;">NEBULA by Abdullah Al Mamun | @A2MBD3</div></div>';
+    selection.innerHTML = '<div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);animation:nebula-scan 3s linear infinite;pointer-events:none;opacity:0.6;"></div><div style="position:relative;z-index:1;"><div style="font-size:7px;color:#0ff;letter-spacing:5px;opacity:0.6;margin-bottom:6px;">SELECT TARGET</div><h3 style="margin:0 0 15px;background:linear-gradient(90deg,#0ff,#f0f,#60f,#f06);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(16px,4vw,20px);font-weight:800;letter-spacing:3px;">TARGET SYSTEM</h3><div style="width:50px;height:2px;background:linear-gradient(90deg,transparent,#f0f,transparent);margin:0 auto 20px;"></div><button id="target-aincrad33" style="width:100%;background:linear-gradient(90deg,rgba(0,255,255,0.08),rgba(255,0,255,0.08));color:#fff;border:1.5px solid rgba(0,255,255,0.4);padding:15px;border-radius:12px;font-weight:700;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;margin-bottom:12px;backdrop-filter:blur(15px);text-transform:uppercase;transition:all 0.3s ease;position:relative;overflow:hidden;"><span style="position:relative;z-index:1;">⬡ AINCRAD 3.3</span><div style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,255,0.1),transparent);transition:left 0.5s;"></div></button><button id="target-aincrad-proxy" style="width:100%;background:linear-gradient(90deg,rgba(255,0,255,0.05),rgba(102,0,255,0.05));color:#fff;border:1.5px solid rgba(255,0,255,0.4);padding:15px;border-radius:12px;font-weight:700;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;margin-bottom:18px;backdrop-filter:blur(15px);text-transform:uppercase;transition:all 0.3s ease;position:relative;overflow:hidden;"><span style="position:relative;z-index:1;">⬡ AINCRAD PROXY</span><div style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,0,255,0.1),transparent);transition:left 0.5s;"></div></button><div style="font-size:7px;color:#334;margin-top:12px;">NEBULA by Abdullah Al Mamun | @A2MBD3</div></div>';
     document.body.appendChild(selection);
 
     const btn33 = document.getElementById("target-aincrad33");
     const btnProxy = document.getElementById("target-aincrad-proxy");
-    const btnBack = document.getElementById("target-back");
 
     [btn33, btnProxy].forEach(btn => {
       btn.addEventListener("mouseenter", () => {
@@ -381,108 +397,59 @@
       });
     });
 
-    btn33.addEventListener("click", async () => {
-      if (needPassword()) {
-        const passInput = document.getElementById("nb-pass-input");
-        const passError = document.getElementById("nb-pass-error");
-        if (!passInput || passInput.value !== USER_DATA.password) {
-          if (passError) { passError.style.display = "block"; if (passInput) passInput.style.borderColor = "#f06"; }
-          return;
+    function processTarget(target, targetName, redirectFile, redirectPrefix) {
+      return async () => {
+        if (needPassword()) {
+          const passInput = document.getElementById("nb-pass-input");
+          const passError = document.getElementById("nb-pass-error");
+          if (!passInput || !checkPassword(passInput.value)) {
+            if (passError) { passError.style.display = "block"; if (passInput) passInput.style.borderColor = "#f06"; }
+            return;
+          }
         }
-      }
 
-      selectedTarget = "aincrad33";
-      selectedTargetName = "AINCRAD 3.3";
-      
-      initProgressActive = false;
-      if (initProgressRAF) cancelAnimationFrame(initProgressRAF);
-      
-      const validUrl = await fetchRedirectUrl(CONFIG.redirectUrlFile1, CONFIG.redirectUrlPrefix1);
-      redirectUrlCache = validUrl || CONFIG.fallbackRedirectUrl;
-      
-      selection.style.transition = "all 0.4s";
-      selection.style.transform = "translate(-50%,-50%) scale(0.9)";
-      selection.style.opacity = "0";
-      
-      setTimeout(() => {
-        selection.remove();
-        if (authBox) {
-          authBox.style.transition = "all 0.4s";
-          authBox.style.transform = "translate(-50%,-50%) scale(0.9)";
-          authBox.style.opacity = "0";
-          setTimeout(() => {
-            authBox.remove();
-            renderExploitPanel(redirectUrlCache);
-          }, 400);
-        }
-      }, 400);
-    });
+        selectedTarget = target;
+        selectedTargetName = targetName;
+        targetSelectionActive = false;
+        
+        const validUrl = await fetchRedirectUrl(redirectFile, redirectPrefix);
+        redirectUrlCache = validUrl || CONFIG.fallbackRedirectUrl;
+        
+        selection.style.transition = "all 0.4s";
+        selection.style.transform = "translate(-50%,-50%) scale(0.9)";
+        selection.style.opacity = "0";
+        
+        setTimeout(() => {
+          selection.remove();
+          if (authBox) {
+            authBox.style.transition = "all 0.4s";
+            authBox.style.transform = "translate(-50%,-50%) scale(0.9)";
+            authBox.style.opacity = "0";
+            setTimeout(() => {
+              authBox.remove();
+              renderExploitPanel(redirectUrlCache);
+            }, 400);
+          }
+        }, 400);
+      };
+    }
 
-    btnProxy.addEventListener("click", async () => {
-      if (needPassword()) {
-        const passInput = document.getElementById("nb-pass-input");
-        const passError = document.getElementById("nb-pass-error");
-        if (!passInput || passInput.value !== USER_DATA.password) {
-          if (passError) { passError.style.display = "block"; if (passInput) passInput.style.borderColor = "#f06"; }
-          return;
-        }
-      }
-
-      selectedTarget = "aincrad-proxy";
-      selectedTargetName = "AINCRAD PROXY";
-      
-      initProgressActive = false;
-      if (initProgressRAF) cancelAnimationFrame(initProgressRAF);
-      
-      const validUrl = await fetchRedirectUrl(CONFIG.redirectUrlFile2, CONFIG.redirectUrlPrefix2);
-      redirectUrlCache = validUrl || CONFIG.fallbackRedirectUrl;
-      
-      selection.style.transition = "all 0.4s";
-      selection.style.transform = "translate(-50%,-50%) scale(0.9)";
-      selection.style.opacity = "0";
-      
-      setTimeout(() => {
-        selection.remove();
-        if (authBox) {
-          authBox.style.transition = "all 0.4s";
-          authBox.style.transform = "translate(-50%,-50%) scale(0.9)";
-          authBox.style.opacity = "0";
-          setTimeout(() => {
-            authBox.remove();
-            renderExploitPanel(redirectUrlCache);
-          }, 400);
-        }
-      }, 400);
-    });
-
-    btnBack.addEventListener("click", () => {
-      selection.style.transition = "all 0.3s";
-      selection.style.transform = "translate(-50%,-50%) scale(0.9)";
-      selection.style.opacity = "0";
-      setTimeout(() => {
-        selection.remove();
-        if (authBox) {
-          authBox.style.opacity = "1";
-          authBox.style.transform = "translate(-50%,-50%) scale(1)";
-          const initBtn = document.getElementById("init-btn");
-          const suppBtn = document.getElementById("support-btn");
-          if (initBtn) initBtn.disabled = false;
-          if (suppBtn) suppBtn.disabled = false;
-          startInitProgress();
-        }
-      }, 300);
-    });
+    btn33.addEventListener("click", processTarget("aincrad33", "AINCRAD 3.3", CONFIG.redirectUrlFile1, CONFIG.redirectUrlPrefix1));
+    btnProxy.addEventListener("click", processTarget("aincrad-proxy", "AINCRAD PROXY", CONFIG.redirectUrlFile2, CONFIG.redirectUrlPrefix2));
 
     if (authBox) {
       authBox.style.transition = "all 0.3s";
-      authBox.style.opacity = "0.3";
-      authBox.style.transform = "translate(-50%,-50%) scale(0.95)";
+      authBox.style.opacity = "0.15";
+      authBox.style.transform = "translate(-50%,-50%) scale(0.92)";
+      authBox.style.pointerEvents = "none";
     }
   }
 
   function renderInitPanel() {
     const ex = document.getElementById("nebula-auth");
     if (ex) ex.remove();
+
+    targetSelectionActive = false;
 
     const st = document.createElement("style");
     st.textContent = "@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');@keyframes nebula-orbit0{0%{transform:translate(0,0)scale(1)}25%{transform:translate(60px,-80px)scale(1.5)}50%{transform:translate(-40px,-160px)scale(0.8)}100%{transform:translate(0,0)scale(1)}}@keyframes nebula-orbit1{0%{transform:translate(0,0)scale(1)}33%{transform:translate(-50px,-100px)scale(0.7)}66%{transform:translate(70px,-60px)scale(1.3)}100%{transform:translate(0,0)scale(1)}}@keyframes nebula-orbit2{0%{transform:translate(0,0)scale(1)}50%{transform:translate(90px,-120px)scale(0.5)}100%{transform:translate(0,0)scale(1)}}@keyframes nebula-pulse{0%,100%{opacity:0.5}50%{opacity:1}}@keyframes nebula-border{0%,100%{border-color:rgba(0,255,255,0.3);box-shadow:0 0 40px rgba(0,255,255,0.1),inset 0 0 40px rgba(0,0,0,0.5)}25%{border-color:rgba(255,0,255,0.4);box-shadow:0 0 60px rgba(255,0,255,0.15),inset 0 0 60px rgba(0,0,0,0.6)}50%{border-color:rgba(102,0,255,0.4);box-shadow:0 0 60px rgba(102,0,255,0.15),inset 0 0 60px rgba(0,0,0,0.6)}75%{border-color:rgba(255,0,100,0.4);box-shadow:0 0 60px rgba(255,0,100,0.15),inset 0 0 60px rgba(0,0,0,0.6)}}@keyframes nebula-float{0%,100%{transform:translate(-50%,-50%)translateY(0)}50%{transform:translate(-50%,-50%)translateY(-6px)}}@keyframes nebula-slide{0%{opacity:0;transform:translateX(-20px)}100%{opacity:1;transform:translateX(0)}}@keyframes nebula-success{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}@keyframes nebula-scan{0%{top:-100%}100%{top:100%}}@keyframes nb-toast-in{from{opacity:0;transform:translateX(-50%)translateY(15px)}to{opacity:1;transform:translateX(-50%)translateY(0)}}@keyframes nb-progress-aurora{0%,100%{filter:hue-rotate(0deg)brightness(1);box-shadow:0 0 12px rgba(0,255,255,0.8)}50%{filter:hue-rotate(180deg)brightness(1.5);box-shadow:0 0 16px rgba(102,0,255,0.9)}}";
@@ -491,7 +458,7 @@
     const box = document.createElement("div");
     box.id = "nebula-auth";
     box.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(160deg,rgba(5,3,20,0.97),rgba(10,5,30,0.97));backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);color:#fff;padding:clamp(20px,4vw,28px);border-radius:20px;z-index:2147483647;font-family:'Orbitron','Rajdhani',sans-serif;text-align:center;width:min(380px,92vw);box-sizing:border-box;border:1.5px solid rgba(0,255,255,0.3);animation:nebula-border 6s ease-in-out infinite,nebula-float 8s ease-in-out infinite;box-shadow:0 0 80px rgba(0,255,255,0.1);overflow:hidden;";
-    box.innerHTML = '<div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);animation:nebula-scan 3s linear infinite;pointer-events:none;opacity:0.6;"></div><div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(0,0,0,0.4);"><div id="nb-progress-init" style="height:100%;width:0%;background:linear-gradient(90deg,#0ff,#f0f,#60f,#0f8);background-size:200% 100%;border-radius:0 0 0 20px;animation:nb-progress-aurora 4s linear infinite;box-shadow:0 0 12px rgba(0,255,255,0.6);"></div></div><div style="position:relative;z-index:1;"><button id="music-btn" style="position:absolute;top:-4px;right:-4px;background:rgba(0,255,255,0.05);border:1px solid rgba(0,255,255,0.25);color:#0ff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(15px);z-index:10;">♪</button><div style="font-size:7px;color:#0ff;letter-spacing:5px;opacity:0.6;margin-bottom:6px;">NEBULA v9.0 [UID:' + USER_DATA.id + ']</div><h3 style="margin:0 0 4px;background:linear-gradient(90deg,#0ff,#f0f,#60f,#f06);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(22px,6vw,28px);font-weight:900;letter-spacing:3px;">' + USER_DATA.name + '</h3><div style="width:50px;height:2px;background:linear-gradient(90deg,transparent,#f0f,transparent);margin:8px auto;"></div><p style="color:#0ff;font-size:10px;letter-spacing:3px;margin-bottom:8px;">◆ SYSTEM READY</p><div id="nb-track-name" style="min-height:14px;margin-bottom:12px;font-size:8px;color:rgba(255,255,255,0.3);"></div>' + (needPassword() ? '<div style="margin-bottom:10px;"><input id="nb-pass-input" type="password" placeholder="ENTER PASSWORD" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(0,255,255,0.25);color:#0ff;padding:10px;border-radius:10px;text-align:center;font-family:\'Orbitron\',sans-serif;font-size:11px;letter-spacing:3px;outline:none;backdrop-filter:blur(10px);"></div><p id="nb-pass-error" style="color:#f06;font-size:8px;display:none;margin-bottom:6px;">WRONG PASSWORD</p>' : '') + '<button id="init-btn" style="width:100%;background:linear-gradient(90deg,rgba(0,255,255,0.08),rgba(255,0,255,0.08));color:#fff;border:1.5px solid rgba(0,255,255,0.4);padding:12px;border-radius:12px;font-weight:700;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;margin-bottom:10px;backdrop-filter:blur(15px);text-transform:uppercase;">⬡ INITIATE NEBULA</button>' + (hasChannel() ? '<button id="support-btn" style="width:100%;background:rgba(255,0,255,0.04);color:#889;border:1.5px solid rgba(255,0,255,0.2);padding:12px;border-radius:12px;font-weight:600;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;backdrop-filter:blur(15px);margin-bottom:14px;">⚡ TELEGRAM</button>' : '') + '<div style="font-size:7px;color:#334;">© Abdullah Al Mamun | @A2MBD3 · 📳 Shake</div></div>';
+    box.innerHTML = '<div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,transparent,#0ff,#f0f,#60f,transparent);animation:nebula-scan 3s linear infinite;pointer-events:none;opacity:0.6;"></div><div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(0,0,0,0.4);"><div id="nb-progress-init" style="height:100%;width:0%;background:linear-gradient(90deg,#0ff,#f0f,#60f,#0f8);background-size:200% 100%;border-radius:0 0 0 20px;animation:nb-progress-aurora 4s linear infinite;box-shadow:0 0 12px rgba(0,255,255,0.6);"></div></div><div style="position:relative;z-index:1;"><button id="music-btn" style="position:absolute;top:-4px;right:-4px;background:rgba(0,255,255,0.05);border:1px solid rgba(0,255,255,0.25);color:#0ff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(15px);z-index:10;">♪</button><div style="font-size:7px;color:#0ff;letter-spacing:5px;opacity:0.6;margin-bottom:6px;">NEBULA v9.0 [UID:' + USER_DATA.id + ']</div><h3 style="margin:0 0 4px;background:linear-gradient(90deg,#0ff,#f0f,#60f,#f06);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(22px,6vw,28px);font-weight:900;letter-spacing:3px;">' + USER_DATA.name + '</h3><div style="width:50px;height:2px;background:linear-gradient(90deg,transparent,#f0f,transparent);margin:8px auto;"></div><p style="color:#0ff;font-size:10px;letter-spacing:3px;margin-bottom:8px;">◆ SYSTEM READY</p><div id="nb-track-name" style="min-height:14px;margin-bottom:12px;font-size:8px;color:rgba(255,255,255,0.3);"></div>' + (needPassword() ? '<div style="margin-bottom:10px;"><input id="nb-pass-input" type="text" autocomplete="off" placeholder="AUTH KEY" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(0,255,255,0.25);color:#0ff;padding:10px;border-radius:10px;text-align:center;font-family:\'Orbitron\',sans-serif;font-size:11px;letter-spacing:3px;outline:none;backdrop-filter:blur(10px);"></div><p id="nb-pass-error" style="color:#f06;font-size:8px;display:none;margin-bottom:6px;">INVALID AUTH KEY</p>' : '') + '<button id="init-btn" style="width:100%;background:linear-gradient(90deg,rgba(0,255,255,0.08),rgba(255,0,255,0.08));color:#fff;border:1.5px solid rgba(0,255,255,0.4);padding:12px;border-radius:12px;font-weight:700;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;margin-bottom:10px;backdrop-filter:blur(15px);text-transform:uppercase;">⬡ INITIATE NEBULA</button>' + (hasChannel() ? '<button id="support-btn" style="width:100%;background:rgba(255,0,255,0.04);color:#889;border:1.5px solid rgba(255,0,255,0.2);padding:12px;border-radius:12px;font-weight:600;cursor:pointer;font-family:\'Orbitron\',sans-serif;font-size:12px;letter-spacing:4px;backdrop-filter:blur(15px);margin-bottom:14px;">⚡ TELEGRAM</button>' : '') + '<div style="font-size:7px;color:#334;">© Abdullah Al Mamun | @A2MBD3 · 📳 Shake</div></div>';
     document.body.appendChild(box);
 
     const musicBtn = document.getElementById("music-btn");
@@ -515,7 +482,7 @@
 
     const initBtn = document.getElementById("init-btn");
     initBtn.addEventListener("click", () => {
-      if (initBtn.disabled) return;
+      if (initBtn.disabled || targetSelectionActive) return;
       initBtn.disabled = true;
       if (suppBtn) suppBtn.disabled = true;
       if (autoInitTimeout) clearTimeout(autoInitTimeout);
@@ -534,7 +501,7 @@
 
     autoInitTimeout = setTimeout(() => { 
       const b = document.getElementById("init-btn"); 
-      if (b && !b.disabled) b.click(); 
+      if (b && !b.disabled && !targetSelectionActive) b.click(); 
     }, CONFIG.autoInitDelay);
   }
 
