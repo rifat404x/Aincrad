@@ -1,6 +1,6 @@
-# 🚫 [Aincrad] - Proprietary & Restricted
+# 🚫 Aincrad - Proprietary & Restricted
 
-**© [2026] [Abdullah Al Mamun]. All Rights Reserved.**
+**© 2026 Abdullah Al Mamun. All Rights Reserved.**
 
 ## ⛔ IMPORTANT: NO COPYING, FORKING, OR CLONING
 
@@ -22,7 +22,7 @@ This project is **not open source**. It is published under a custom **All Rights
 - You **may not** create derivative works.
 - You **may not** reproduce this code in any medium.
 
-For licensing inquiries, please contact: **[t.me/A2MBD3]**
+For licensing inquiries, please contact: **t.me/A2MBD3**
 
 ## 📜 Legal Notice
 
@@ -32,4 +32,4 @@ Unauthorized copying, modification, distribution, or use of this software, via a
 
 ---
 
-*Made with ❤️ by [Abdullah Al Mamun]*
+*Made with ❤️ by Abdullah Al Mamun [@A2MBD3]*
