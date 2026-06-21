@@ -1,636 +1,674 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0a0a14">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>সার্ভার সমস্যা | 500 Error</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes">
+  <meta name="theme-color" content="#0c0b14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>সার্ভার প্রত্যাখ্যান | সংযোগ সমস্যা</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            height: -webkit-fill-available;
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow: hidden;
-            position: fixed;
-            top: 0;
-            left: 0;
-            font-family: 'Inter', 'Segoe UI', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
-            background: #0a0a14;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-font-smoothing: antialiased;
-            touch-action: manipulation;
-        }
+    html, body {
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      position: fixed;
+      top: 0;
+      left: 0;
+      font-family: 'Inter', 'Segoe UI', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+      background: #0c0b14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+    }
 
-        /* ============ মেইন কন্টেইনার ============ */
-        .container {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            height: -webkit-fill-available;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            background: #0a0a14;
-            position: relative;
-            overflow: hidden;
-        }
+    .container {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: #0c0b14;
+      position: relative;
+      overflow: hidden;
+    }
 
-        /* ============ এনিমেটেড গ্রেডিয়েন্ট ব্যাকগ্রাউন্ড ============ */
-        .bg-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.5;
-            animation: orbFloat 10s ease-in-out infinite;
-        }
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.45;
+      animation: orbFloat 12s ease-in-out infinite;
+      will-change: transform;
+    }
 
-        .bg-orb-1 {
-            width: 300px;
-            height: 300px;
-            background: #ff5e5e;
-            top: -100px;
-            left: -80px;
-            animation-delay: 0s;
-        }
+    .bg-orb-1 {
+      width: 320px;
+      height: 320px;
+      background: #f97316;
+      top: -90px;
+      left: -70px;
+      animation-delay: 0s;
+    }
 
-        .bg-orb-2 {
-            width: 250px;
-            height: 250px;
-            background: #8b5cf6;
-            bottom: -80px;
-            right: -60px;
-            animation-delay: 3s;
-        }
+    .bg-orb-2 {
+      width: 280px;
+      height: 280px;
+      background: #a855f7;
+      bottom: -100px;
+      right: -80px;
+      animation-delay: 4s;
+      opacity: 0.4;
+    }
 
-        .bg-orb-3 {
-            width: 200px;
-            height: 200px;
-            background: #2ea6ff;
-            top: 50%;
-            left: 60%;
-            animation-delay: 6s;
-            opacity: 0.35;
-        }
+    .bg-orb-3 {
+      width: 220px;
+      height: 220px;
+      background: #3b82f6;
+      top: 60%;
+      left: 70%;
+      animation-delay: 7s;
+      opacity: 0.3;
+    }
 
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(25px, -35px) scale(1.12); }
+      66% { transform: translate(-30px, 25px) scale(0.88); }
+    }
 
-        /* ============ গ্রিড প্যাটার্ন ============ */
-        .grid-pattern {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
-            mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-            -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-            pointer-events: none;
-        }
+    .grid-pattern {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(ellipse at center, black 25%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 75%);
+      pointer-events: none;
+    }
 
-        /* ============ টপ গ্লো লাইন ============ */
-        .glow-line-top {
-            position: absolute;
-            top: 0;
-            left: 20%;
-            width: 60%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 94, 94, 0.4), rgba(139, 92, 246, 0.4), transparent);
-            pointer-events: none;
-        }
+    .glow-line-top {
+      position: absolute;
+      top: 0;
+      left: 15%;
+      width: 70%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.5), rgba(168, 85, 247, 0.4), transparent);
+      pointer-events: none;
+    }
 
-        .glow-line-bottom {
-            position: absolute;
-            bottom: 0;
-            left: 20%;
-            width: 60%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(46, 166, 255, 0.3), rgba(139, 92, 246, 0.3), transparent);
-            pointer-events: none;
-        }
+    .glow-line-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 15%;
+      width: 70%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), transparent);
+      pointer-events: none;
+    }
 
-        /* ============ গ্লাস কার্ড ============ */
-        .glass-card {
-            position: relative;
-            z-index: 2;
-            background: rgba(22, 22, 40, 0.55);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            padding: 38px 30px;
-            text-align: center;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 
-                0 25px 60px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-                0 0 80px rgba(255, 94, 94, 0.06);
-            overflow: hidden;
-        }
+    .glass-card {
+      position: relative;
+      z-index: 2;
+      background: rgba(20, 18, 33, 0.65);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 36px;
+      padding: 36px 28px;
+      text-align: center;
+      width: 100%;
+      max-width: 460px;
+      box-shadow:
+        0 30px 55px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 0 90px rgba(249, 115, 22, 0.08);
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
 
-        /* ============ কার্ডের ভেতর গ্লো ============ */
-        .card-inner-glow {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(ellipse at center, rgba(255, 94, 94, 0.04) 0%, transparent 60%);
-            pointer-events: none;
-        }
+    .card-inner-glow {
+      position: absolute;
+      top: -40%;
+      left: -40%;
+      width: 180%;
+      height: 180%;
+      background: radial-gradient(ellipse at center, rgba(249, 115, 22, 0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
 
-        /* ============ এরর আইকন কন্টেইনার ============ */
-        .icon-wrapper {
-            display: inline-block;
-            position: relative;
-            margin-bottom: 14px;
-        }
+    .icon-wrapper {
+      display: inline-block;
+      position: relative;
+      margin-bottom: 12px;
+    }
 
-        .icon-circle {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: rgba(255, 94, 94, 0.08);
-            border: 2px solid rgba(255, 94, 94, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-        }
+    .icon-circle {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: rgba(249, 115, 22, 0.1);
+      border: 2px solid rgba(249, 115, 22, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(8px);
+    }
 
-        .icon-ring {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 94, 94, 0.1);
-            animation: ringPulse 2.5s ease-in-out infinite;
-        }
+    .icon-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      border: 1px solid rgba(249, 115, 22, 0.18);
+      animation: ringPulse 2.8s ease-in-out infinite;
+    }
 
-        @keyframes ringPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
-        }
+    @keyframes ringPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+      50% { transform: translate(-50%, -50%) scale(1.18); opacity: 0; }
+    }
 
-        .error-emoji {
-            font-size: 38px;
-            position: relative;
-            z-index: 2;
-            animation: softBounce 3s ease-in-out infinite;
-        }
+    .error-emoji {
+      font-size: 40px;
+      position: relative;
+      z-index: 2;
+      animation: softBounce 3.2s ease-in-out infinite;
+    }
 
-        @keyframes softBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+    @keyframes softBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
 
-        /* ============ এরর কোড ============ */
-        .error-code {
-            font-size: 72px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #ff5e5e, #ff8f8f, #ff5e5e);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 3s ease infinite;
-            letter-spacing: 3px;
-            line-height: 1;
-            margin-bottom: 6px;
-        }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(249, 115, 22, 0.14);
+      border: 1px solid rgba(249, 115, 22, 0.28);
+      border-radius: 24px;
+      padding: 6px 16px;
+      font-size: 11px;
+      color: #fed7aa;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      backdrop-filter: blur(5px);
+      transition: all 0.2s ease;
+    }
 
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #f97316;
+      border-radius: 50%;
+      animation: statusBlink 1.6s ease-in-out infinite;
+      box-shadow: 0 0 10px #f97316;
+    }
 
-        /* ============ স্ট্যাটাস ব্যাজ ============ */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255, 94, 94, 0.12);
-            border: 1px solid rgba(255, 94, 94, 0.2);
-            border-radius: 20px;
-            padding: 5px 14px;
-            font-size: 11px;
-            color: #ff8f8f;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 14px;
-        }
+    @keyframes statusBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
 
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            background: #ff5e5e;
-            border-radius: 50%;
-            animation: statusBlink 1.5s ease-in-out infinite;
-            box-shadow: 0 0 6px #ff5e5e;
-        }
+    .error-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #f5f3ff;
+      margin-bottom: 10px;
+      line-height: 1.3;
+      letter-spacing: -0.2px;
+      transition: all 0.2s ease;
+    }
 
-        @keyframes statusBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+    .error-title .highlight {
+      background: linear-gradient(135deg, #fdba74, #f97316);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-        /* ============ টাইটেল ============ */
-        .error-title {
-            font-size: 21px;
-            font-weight: 700;
-            color: #f0f0f5;
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
+    .error-message {
+      font-size: 15px;
+      color: #c7c3d4;
+      margin-bottom: 18px;
+      line-height: 1.6;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
 
-        .error-title .highlight {
-            background: linear-gradient(135deg, #ff8f8f, #ffb3b3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .troubleshoot-box {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 22px;
+      padding: 16px 14px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: left;
+      backdrop-filter: blur(10px);
+    }
 
-        /* ============ মেসেজ ============ */
-        .error-message {
-            font-size: 14px;
-            color: #a0a0b8;
-            margin-bottom: 10px;
-            line-height: 1.7;
-        }
+    .fix-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
 
-        .error-sub {
-            font-size: 12px;
-            color: #7a7a95;
-            margin-bottom: 18px;
-            font-style: italic;
-        }
+    .fix-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #d1cfdd;
+      line-height: 1.4;
+      transition: all 0.2s ease;
+    }
 
-        /* ============ ডিভাইডার ============ */
-        .divider-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
+    .fix-icon {
+      font-size: 18px;
+      min-width: 24px;
+      text-align: center;
+      opacity: 0.9;
+    }
 
-        .divider-line {
-            width: 40px;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.15);
-        }
+    .fix-text strong {
+      color: #f5f0ff;
+      font-weight: 600;
+    }
 
-        .divider-icon {
-            font-size: 14px;
-            opacity: 0.6;
-        }
+    .fix-text {
+      color: #b9b3cc;
+    }
 
-        /* ============ বাটন গ্রুপ ============ */
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            align-items: center;
-        }
+    .divider-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
 
-        @media (min-width: 420px) {
-            .button-group {
-                flex-direction: row;
-                justify-content: center;
-            }
-        }
+    .divider-line {
+      width: 45px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.15);
+    }
 
-        /* ============ বাটন ============ */
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px 26px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 50px;
-            text-decoration: none;
-            color: #fff;
-            width: 100%;
-            max-width: 270px;
-            transition: all 0.2s ease;
-            letter-spacing: 0.3px;
-            position: relative;
-            overflow: hidden;
-        }
+    .divider-icon {
+      font-size: 16px;
+      opacity: 0.7;
+    }
 
-        @media (min-width: 420px) {
-            .btn {
-                width: auto;
-                min-width: 170px;
-                max-width: none;
-                flex: 1;
-            }
-        }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
 
-        /* বাটন শাইন */
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
+    @media (min-width: 420px) {
+      .button-group {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
 
-        @media (hover: hover) {
-            .btn:hover::after {
-                left: 100%;
-            }
-        }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 40px;
+      text-decoration: none;
+      color: #fff;
+      width: 100%;
+      max-width: 280px;
+      transition: all 0.25s ease;
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
 
-        /* চ্যানেল বাটন */
-        .btn-channel {
-            background: linear-gradient(135deg, rgba(46, 166, 255, 0.25), rgba(46, 166, 255, 0.15));
-            border: 1px solid rgba(46, 166, 255, 0.4);
-            box-shadow: 0 4px 20px rgba(46, 166, 255, 0.15);
-        }
+    @media (min-width: 420px) {
+      .btn {
+        width: auto;
+        min-width: 160px;
+        max-width: none;
+        flex: 1;
+      }
+    }
 
-        .btn-channel:active {
-            transform: scale(0.96);
-            background: rgba(46, 166, 255, 0.35);
-        }
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+      transition: left 0.5s;
+    }
 
-        /* গ্রুপ বাটন */
-        .btn-group {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(139, 92, 246, 0.15));
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
-        }
+    @media (hover: hover) {
+      .btn:hover::after {
+        left: 100%;
+      }
+    }
 
-        .btn-group:active {
-            transform: scale(0.96);
-            background: rgba(139, 92, 246, 0.35);
-        }
+    .btn-channel {
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(234, 88, 12, 0.2));
+      border: 1px solid rgba(249, 115, 22, 0.5);
+      box-shadow: 0 6px 22px rgba(249, 115, 22, 0.2);
+    }
 
-        .btn-icon {
-            font-size: 19px;
-            transition: transform 0.3s ease;
-        }
+    .btn-channel:active {
+      transform: scale(0.96);
+      background: rgba(249, 115, 22, 0.4);
+    }
 
-        @media (hover: hover) {
-            .btn:hover .btn-icon {
-                transform: scale(1.15) rotate(-8deg);
-            }
-        }
+    .btn-group {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(147, 51, 234, 0.2));
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      box-shadow: 0 6px 22px rgba(168, 85, 247, 0.2);
+    }
 
-        .btn-text {
-            font-size: 13px;
-            font-weight: 600;
-        }
+    .btn-group:active {
+      transform: scale(0.96);
+      background: rgba(168, 85, 247, 0.4);
+    }
 
-        /* ============ ফুটার ============ */
-        .footer-section {
-            margin-top: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+    .btn-icon {
+      font-size: 20px;
+      transition: transform 0.25s ease;
+    }
 
-        .footer-dot {
-            width: 3px;
-            height: 3px;
-            background: #6a6a85;
-            border-radius: 50%;
-        }
+    @media (hover: hover) {
+      .btn:hover .btn-icon {
+        transform: scale(1.1) rotate(-5deg);
+      }
+    }
 
-        .footer-text {
-            font-size: 11px;
-            color: #6a6a85;
-            letter-spacing: 0.5px;
-        }
+    .btn-text {
+      font-size: 13px;
+      font-weight: 600;
+    }
 
-        /* ============ রেস্পন্সিভ ============ */
+    .footer-section {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
 
-        /* ছোট মোবাইল */
-        @media (max-width: 370px) {
-            .glass-card {
-                padding: 28px 18px;
-                border-radius: 24px;
-            }
-            .icon-circle {
-                width: 64px;
-                height: 64px;
-            }
-            .icon-ring {
-                width: 80px;
-                height: 80px;
-            }
-            .error-emoji { font-size: 30px; }
-            .error-code { font-size: 54px; }
-            .error-title { font-size: 17px; }
-            .error-message { font-size: 13px; }
-            .status-badge { font-size: 10px; padding: 4px 10px; }
-            .btn { padding: 13px 20px; }
-            .btn-icon { font-size: 16px; }
-            .btn-text { font-size: 12px; }
-        }
+    .footer-dot {
+      width: 4px;
+      height: 4px;
+      background: #8a849e;
+      border-radius: 50%;
+    }
 
-        /* ল্যান্ডস্কেপ */
-        @media (max-width: 500px) and (orientation: landscape) {
-            .glass-card {
-                padding: 18px 22px;
-                border-radius: 20px;
-                max-width: 380px;
-            }
-            .icon-circle {
-                width: 50px;
-                height: 50px;
-            }
-            .icon-ring {
-                width: 64px;
-                height: 64px;
-            }
-            .error-emoji { font-size: 24px; margin-bottom: 0; }
-            .icon-wrapper { margin-bottom: 8px; }
-            .error-code { font-size: 40px; }
-            .status-badge { margin-bottom: 8px; font-size: 9px; }
-            .error-title { font-size: 15px; }
-            .error-message { font-size: 12px; margin-bottom: 6px; }
-            .error-sub { font-size: 10px; margin-bottom: 10px; }
-            .divider-wrapper { margin-bottom: 10px; }
-            .button-group { flex-direction: row; gap: 8px; }
-            .btn { padding: 10px 14px; }
-            .btn-icon { font-size: 14px; }
-            .btn-text { font-size: 11px; }
-            .footer-section { margin-top: 10px; }
-            .footer-text { font-size: 9px; }
-        }
+    .footer-text {
+      font-size: 11px;
+      color: #8a849e;
+      letter-spacing: 0.4px;
+      transition: all 0.2s ease;
+    }
 
-        /* ট্যাবলেট */
-        @media (min-width: 768px) {
-            .glass-card {
-                max-width: 500px;
-                padding: 42px 38px;
-                border-radius: 34px;
-            }
-            .icon-circle {
-                width: 90px;
-                height: 90px;
-            }
-            .icon-ring {
-                width: 112px;
-                height: 112px;
-            }
-            .error-emoji { font-size: 44px; }
-            .error-code { font-size: 80px; }
-            .error-title { font-size: 24px; }
-            .error-message { font-size: 15px; }
-            .btn { padding: 16px 30px; }
-        }
+    @media (max-width: 380px) {
+      .glass-card {
+        padding: 28px 16px;
+        border-radius: 28px;
+      }
+      .icon-circle {
+        width: 68px;
+        height: 68px;
+      }
+      .icon-ring {
+        width: 86px;
+        height: 86px;
+      }
+      .error-emoji { font-size: 34px; }
+      .error-title { font-size: 20px; }
+      .troubleshoot-box { padding: 14px 10px; }
+      .fix-item { font-size: 12px; }
+      .btn { padding: 13px 18px; }
+    }
 
-        /* ডেস্কটপ */
-        @media (min-width: 1024px) {
-            .glass-card {
-                max-width: 520px;
-            }
-        }
+    @media (max-width: 500px) and (orientation: landscape) {
+      .glass-card {
+        padding: 16px 18px;
+        max-width: 400px;
+        border-radius: 24px;
+      }
+      .icon-circle { width: 52px; height: 52px; }
+      .icon-ring { width: 68px; height: 68px; }
+      .error-emoji { font-size: 28px; }
+      .error-title { font-size: 18px; }
+      .troubleshoot-box { padding: 10px; margin-bottom: 12px; }
+      .fix-item { font-size: 11px; gap: 8px; }
+      .button-group { flex-direction: row; gap: 8px; }
+    }
 
-        /* ডেস্কটপ hover */
-        @media (hover: hover) {
-            .btn-channel:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 30px rgba(46, 166, 255, 0.3);
-            }
-            .btn-group:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 30px rgba(139, 92, 246, 0.3);
-            }
-            .glass-card:hover {
-                border-color: rgba(255, 255, 255, 0.15);
-                box-shadow: 
-                    0 30px 70px rgba(0, 0, 0, 0.5),
-                    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-                    0 0 100px rgba(255, 94, 94, 0.08);
-                transition: all 0.4s ease;
-            }
-        }
+    @media (min-width: 768px) {
+      .glass-card { max-width: 500px; padding: 42px 36px; }
+      .error-title { font-size: 26px; }
+    }
 
-        /* reduced motion */
-        @media (prefers-reduced-motion: reduce) {
-            .error-emoji,
-            .bg-orb,
-            .icon-ring {
-                animation: none;
-            }
-        }
-    </style>
+    @media (hover: hover) {
+      .btn-channel:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(249, 115, 22, 0.35);
+      }
+      .btn-group:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(168, 85, 247, 0.35);
+      }
+      .glass-card:hover {
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 35px 70px rgba(0, 0, 0, 0.55), 0 0 100px rgba(249, 115, 22, 0.1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .error-emoji, .bg-orb, .icon-ring { animation: none; }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
 
-    <div class="container">
+    <div class="grid-pattern"></div>
+    <div class="glow-line-top"></div>
+    <div class="glow-line-bottom"></div>
 
-        <!-- ব্যাকগ্রাউন্ড অর্ব -->
-        <div class="bg-orb bg-orb-1"></div>
-        <div class="bg-orb bg-orb-2"></div>
-        <div class="bg-orb bg-orb-3"></div>
+    <div class="glass-card">
+      <div class="card-inner-glow"></div>
 
-        <!-- গ্রিড প্যাটার্ন -->
-        <div class="grid-pattern"></div>
-
-        <!-- টপ ও বটম গ্লো লাইন -->
-        <div class="glow-line-top"></div>
-        <div class="glow-line-bottom"></div>
-
-        <!-- গ্লাস কার্ড -->
-        <div class="glass-card">
-
-            <!-- কার্ড ইনার গ্লো -->
-            <div class="card-inner-glow"></div>
-
-            <!-- আইকন -->
-            <div class="icon-wrapper">
-                <div class="icon-ring"></div>
-                <div class="icon-circle">
-                    <span class="error-emoji">😓</span>
-                </div>
-            </div>
-
-            <!-- স্ট্যাটাস ব্যাজ -->
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                Server Not Responding 
-            </div>
-
-            <!-- এরর কোড -->
-            <div class="error-code">500</div>
-
-            <!-- টাইটেল -->
-            <div class="error-title">
-                দুঃখিত! <span class="highlight">সার্ভার সমস্যা</span>
-            </div>
-
-            <!-- মেসেজ -->
-            <div class="error-message">
-                সার্ভার রেসপন্স করছে না। সম্ভাব্য কারণ অনেক ব্যবহারকারী। দয়া করে আবার চেষ্টা করুন।
-            </div>
-            <div class="error-sub">
-                আমরা দ্রুত এটি ঠিক করার চেষ্টা করছি...
-            </div>
-
-            <!-- ডিভাইডার -->
-            <div class="divider-wrapper">
-                <div class="divider-line"></div>
-                <span class="divider-icon">🔗</span>
-                <div class="divider-line"></div>
-            </div>
-
-            <!-- বাটন -->
-            <div class="button-group">
-                <a href="https://t.me/phantomsect" target="_blank" class="btn btn-channel" rel="noopener">
-                    <span class="btn-icon">📢</span>
-                    <span class="btn-text">আপডেট চ্যানেল দেখুন</span>
-                </a>
-
-                <a href="https://t.me/redguild" target="_blank" class="btn btn-group" rel="noopener">
-                    <span class="btn-icon">💬</span>
-                    <span class="btn-text">গ্রুপে জিজ্ঞেসা করুন</span>
-                </a>
-            </div>
-
-            <!-- ফুটার -->
-            <div class="footer-section">
-                <span class="footer-dot"></span>
-                <span class="footer-text">ধন্যবাদ আপনার ধৈর্যের জন্য</span>
-                <span class="footer-dot"></span>
-            </div>
-
+      <div class="icon-wrapper">
+        <div class="icon-ring"></div>
+        <div class="icon-circle">
+          <span class="error-emoji">🚫</span>
         </div>
-    </div>
+      </div>
 
+      <!-- ডাইনামিক স্ট্যাটাস ব্যাজ -->
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="statusText">সার্ভার প্রত্যাখ্যান</span>
+      </div>
+
+      <!-- ডাইনামিক টাইটেল -->
+      <div class="error-title" id="errorTitle">
+        সংযোগ <span class="highlight">প্রত্যাখ্যাত</span>
+      </div>
+
+      <!-- ডাইনামিক মেসেজ -->
+      <div class="error-message" id="errorMessage">
+        সার্ভার আপনার অনুরোধ গ্রহণ করেনি। নিচের সমাধানগুলো চেষ্টা করুন।
+      </div>
+
+      <!-- সমস্যা সমাধান বক্স (ডাইনামিক) -->
+      <div class="troubleshoot-box">
+        <ul class="fix-list" id="fixList">
+          <li class="fix-item"><span class="fix-icon">🕒</span><span class="fix-text"><strong>ফোনের সময় ঠিক করুন</strong> – স্বয়ংক্রিয় সময় সেটিং চালু আছে কিনা নিশ্চিত হোন।</span></li>
+          <li class="fix-item"><span class="fix-icon">🐌</span><span class="fix-text"><strong>ধীর ইন্টারনেট</strong> – ওয়াইফাই বা মোবাইল ডেটা সিগন্যাল চেক করুন।</span></li>
+          <li class="fix-item"><span class="fix-icon">🌐</span><span class="fix-text"><strong>ক্রোম ব্যবহার করুন</strong> – আপডেটেড গুগল ক্রোম ব্রাউজার দিয়ে চেষ্টা করুন।</span></li>
+          <li class="fix-item"><span class="fix-icon">🔁</span><span class="fix-text"><strong>ক্যাশে ক্লিয়ার</strong> – ব্রাউজারের ক্যাশে ও কুকি মুছে পুনরায় লোড দিন।</span></li>
+        </ul>
+      </div>
+
+      <div class="divider-wrapper">
+        <div class="divider-line"></div>
+        <span class="divider-icon">💡</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="button-group">
+        <a href="https://t.me/solo_crx" target="_blank" class="btn btn-channel" rel="noopener">
+          <span class="btn-icon">📢</span>
+          <span class="btn-text" id="channelBtnText">আপডেট চ্যানেল</span>
+        </a>
+        <a href="https://t.me/redguild" target="_blank" class="btn btn-group" rel="noopener">
+          <span class="btn-icon">💬</span>
+          <span class="btn-text" id="groupBtnText">সাহায্য গ্রুপ</span>
+        </a>
+      </div>
+
+      <div class="footer-section">
+        <span class="footer-dot"></span>
+        <span class="footer-text" id="footerText">ধৈর্য ধরার জন্য ধন্যবাদ</span>
+        <span class="footer-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ভাষা ডেটা
+      const langData = {
+        bn: {
+          status: 'সার্ভার প্রত্যাখ্যান',
+          titlePart1: 'সংযোগ ',
+          titleHighlight: 'প্রত্যাখ্যাত',
+          message: 'সার্ভার আপনার অনুরোধ গ্রহণ করেনি। নিচের সমাধানগুলো চেষ্টা করুন।',
+          fixes: [
+            { icon: '🕒', strong: 'ফোনের সময় ঠিক করুন', desc: '– স্বয়ংক্রিয় সময় সেটিং চালু আছে কিনা নিশ্চিত হোন।' },
+            { icon: '🐌', strong: 'ধীর ইন্টারনেট', desc: '– ওয়াইফাই বা মোবাইল ডেটা সিগন্যাল চেক করুন।' },
+            { icon: '🌐', strong: 'ক্রোম ব্যবহার করুন', desc: '– আপডেটেড গুগল ক্রোম ব্রাউজার দিয়ে চেষ্টা করুন।' },
+            { icon: '🔁', strong: 'ক্যাশে ক্লিয়ার', desc: '– ব্রাউজারের ক্যাশে ও কুকি মুছে পুনরায় লোড দিন।' }
+          ],
+          channelBtn: 'আপডেট চ্যানেল',
+          groupBtn: 'সাহায্য গ্রুপ',
+          footer: 'ধৈর্য ধরার জন্য ধন্যবাদ'
+        },
+        en: {
+          status: 'SERVER REJECTED',
+          titlePart1: 'Connection ',
+          titleHighlight: 'Rejected',
+          message: 'The server rejected your request. Try the fixes below.',
+          fixes: [
+            { icon: '🕒', strong: 'Fix Phone Time', desc: '– Make sure automatic time & date is enabled.' },
+            { icon: '🐌', strong: 'Slow Internet', desc: '– Check your WiFi or mobile data signal.' },
+            { icon: '🌐', strong: 'Try Chrome', desc: '– Use an updated Google Chrome browser.' },
+            { icon: '🔁', strong: 'Clear Cache', desc: '– Clear browser cache & cookies, then reload.' }
+          ],
+          channelBtn: 'Update Channel',
+          groupBtn: 'Support Group',
+          footer: 'Thanks for your patience'
+        }
+      };
+
+      // DOM এলিমেন্টস
+      const statusTextEl = document.getElementById('statusText');
+      const errorTitleEl = document.getElementById('errorTitle');
+      const errorMessageEl = document.getElementById('errorMessage');
+      const fixListEl = document.getElementById('fixList');
+      const channelBtnTextEl = document.getElementById('channelBtnText');
+      const groupBtnTextEl = document.getElementById('groupBtnText');
+      const footerTextEl = document.getElementById('footerText');
+
+      let currentLang = 'bn'; // শুরু বাংলা দিয়ে
+
+      // কন্টেন্ট আপডেট ফাংশন
+      function updateContent(lang) {
+        const data = langData[lang];
+        
+        // স্ট্যাটাস ব্যাজ
+        statusTextEl.textContent = data.status;
+        
+        // টাইটেল (হাইলাইট স্প্যান সহ)
+        errorTitleEl.innerHTML = `${data.titlePart1}<span class="highlight">${data.titleHighlight}</span>`;
+        
+        // মেসেজ
+        errorMessageEl.textContent = data.message;
+        
+        // ফিক্স লিস্ট
+        fixListEl.innerHTML = '';
+        data.fixes.forEach(fix => {
+          const li = document.createElement('li');
+          li.className = 'fix-item';
+          li.innerHTML = `<span class="fix-icon">${fix.icon}</span><span class="fix-text"><strong>${fix.strong}</strong> ${fix.desc}</span>`;
+          fixListEl.appendChild(li);
+        });
+        
+        // বাটন টেক্সট
+        channelBtnTextEl.textContent = data.channelBtn;
+        groupBtnTextEl.textContent = data.groupBtn;
+        
+        // ফুটার
+        footerTextEl.textContent = data.footer;
+      }
+
+      // ভাষা টগল ফাংশন
+      function toggleLanguage() {
+        if (currentLang === 'bn') {
+          currentLang = 'en';
+        } else {
+          currentLang = 'bn';
+        }
+        updateContent(currentLang);
+      }
+
+      // প্রাথমিক কন্টেন্ট সেট (বাংলা)
+      updateContent('bn');
+
+      // প্রতি ৫ সেকেন্ডে ভাষা পরিবর্তন
+      setInterval(toggleLanguage, 5000);
+
+      // পাওয়ার সেভ বা ব্যাকগ্রাউন্ডে গেলে ইন্টারভাল ঠিক থাকবে।
+      // ভিজিবিলিটি চেঞ্জে কোন রিসেট দরকার নেই, শুধু চলতে থাকুক।
+    })();
+  </script>
 </body>
 </html>
