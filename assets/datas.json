@@ -10,9 +10,7 @@
     "exploitProgressTime": 20000,
     "autoInitDelay": 10000
   },
-  "audio": {
-    "volume": 0.35
-  },
+
   "ui": {
     "particleCount": {
       "mobile": 30,
