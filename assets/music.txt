@@ -1,11 +1,11 @@
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/fonk.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/AIRTEL.m4a
-https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Ashreveal.m4a
-https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Darkside.m4a
+https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Ashreveal.mp3
+https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Darkside.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/DJ%20BRATT.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Mortals.mp3
-https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/ODNOGO.m4a
+https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/ODNOGO.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/REVENGE.mp3
-https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/REVENGE%202.0.m4a
+https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Baby%20Stop.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Yara%20Yara%20Ya.m4a
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Sorry.mp3
