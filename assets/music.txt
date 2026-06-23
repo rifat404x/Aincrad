@@ -1,4 +1,3 @@
-https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/fonk.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/AIRTEL.m4a
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Ashreveal.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Darkside.mp3
