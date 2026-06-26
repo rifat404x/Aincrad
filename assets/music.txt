@@ -8,3 +8,6 @@ https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/REVENGE.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Baby%20Stop.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Yara%20Yara%20Ya.mp3
 https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Sorry.mp3
+https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Attitude.mp3
+https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/SLAVA.mp3
+https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music/Wahran.mp3
