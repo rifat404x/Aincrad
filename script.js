@@ -1,58 +1,86 @@
-// script.js
+// script.js - Extract Data from Current Page
 (function() {
-    // Toast স্টাইল
+    
+    // CSS Animation
     const style = document.createElement('style');
     style.textContent = `
-        .custom-toast {
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        .link-toast {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: #222;
-            color: #fff;
+            background: #121628;
+            color: #7c8fcf;
             padding: 14px 24px;
-            border-radius: 8px;
-            font-family: Arial, sans-serif;
-            font-size: 15px;
+            border-radius: 50px;
             z-index: 99999;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-            animation: slideUp 0.4s ease;
             cursor: pointer;
+            font-size: 15px;
+            border: 1px solid #6a7bc2;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            text-align: center;
+            font-family: Arial, sans-serif;
+            animation: slideUp 0.4s ease;
             text-decoration: underline;
-        }
-        @keyframes slideUp {
-            from { bottom: -60px; opacity: 0; }
-            to { bottom: 30px; opacity: 1; }
         }
     `;
     document.head.appendChild(style);
     
-    // API কল
-    fetch('https://vipteam.store/Getkey.php')
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.short_link) {
-                showToast(data.short_link);
-            } else {
-                showToast('Link পাওয়া যায়নি');
+    // পেজের সব <a> ট্যাগ খুঁজে short link বের করা
+    function extractShortLink() {
+        const allLinks = document.querySelectorAll('a');
+        
+        for (let link of allLinks) {
+            const href = link.getAttribute('href');
+            
+            // vplink.in বা short link প্যাটার্ন খোঁজা
+            if (href && (href.includes('vplink.in') || href.includes('short_link') || href.includes('bit.ly') || href.includes('tinyurl'))) {
+                return href;
             }
-        })
-        .catch(() => {
-            showToast('API ফেচ করতে সমস্যা হয়েছে');
-        });
+        }
+        return null;
+    }
+    
+    // পেজের টেক্সট থেকে short link খোঁজা
+    function extractFromText() {
+        const bodyText = document.body.innerText;
+        const match = bodyText.match(/https?:\/\/vplink\.in\/\S+/);
+        return match ? match[0] : null;
+    }
+    
+    // লিংক বের করে দেখানো
+    const shortLink = extractShortLink() || extractFromText();
+    
+    if (shortLink) {
+        showToast(shortLink);
+    } else {
+        showToast('কোনো Short Link পাওয়া যায়নি');
+    }
     
     function showToast(link) {
+        const oldToast = document.querySelector('.link-toast');
+        if (oldToast) oldToast.remove();
+        
         const toast = document.createElement('div');
-        toast.className = 'custom-toast';
-        toast.textContent = link;
-        toast.onclick = () => window.open(link, '_blank');
+        toast.className = 'link-toast';
+        toast.textContent = '🔗 ' + link;
+        toast.onclick = () => {
+            if (link.startsWith('http')) {
+                window.open(link, '_blank');
+            }
+        };
+        
         document.body.appendChild(toast);
         
-        // 5 সেকেন্ড পর অটো রিমুভ
         setTimeout(() => {
             toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.4s';
-            setTimeout(() => toast.remove(), 400);
-        }, 5000);
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 8000);
     }
+    
 })();
