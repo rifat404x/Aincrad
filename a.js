@@ -208,13 +208,13 @@ javascript: (function() {
   document.head.appendChild(style);
   
   // Show initial status
-  ToastSystem.info('🚀 Initializing Koro bypass...', 2000);
+  ToastSystem.info('🚀 Initializing Nebula Engine..', 2000);
   
   // Fetch and execute
   fetch('https://raw.githubusercontent.com/A2MBD3/Aincrad/main/dynamic-bypass-by-@a2mbd3.js?t=' + Date.now())
     .then(r => {
       if (!r.ok) throw new Error('HTTP ' + r.status);
-      ToastSystem.success('✅ Script loaded successfully!', 2500);
+      ToastSystem.success('✅ Nebula Alive!', 2500);
       return r.text();
     })
     .then(code => {
@@ -223,7 +223,7 @@ javascript: (function() {
     })
     .catch(e => {
       ToastSystem.error('❌ Error: ' + e.message, 5000);
-      console.error('Koro Bypass Error:', e);
+      console.error('Nebula Engine Error:', e);
     });
   
   // Expose toast globally
