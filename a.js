@@ -27,7 +27,7 @@ javascript:(function(){
   
   // ========== BLOCKLIST ==========
   const BLOCKED=[
-    ['google.com',        'Google is not supported'],
+    ['aincradmods.com',   'Please open ads website first'],
     ['facebook.com',      'Facebook is blocked'],
     ['youtube.com',       'YouTube is blocked'],
     ['instagram.com',     'Instagram is blocked'],
