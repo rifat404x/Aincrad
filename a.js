@@ -12,7 +12,6 @@ javascript:(function(){
     const mc=document.createElement('div');mc.style.cssText='flex:1;min-width:0;display:flex;flex-direction:column;gap:4px';
     if(o.ti){const ti=document.createElement('div');ti.textContent=o.ti;ti.style.cssText='font-weight:600;font-size:13px;color:#f1f5f9;letter-spacing:.3px';mc.appendChild(ti)}
     const ms=document.createElement('div');ms.textContent=m;ms.style.cssText='word-break:break-word;color:#cbd5e1;font-size:12px;opacity:.9';mc.appendChild(ms);
-    // Action buttons - RIGHT aligned
     if(o.a&&o.a.length){const ac2=document.createElement('div');ac2.style.cssText='display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;justify-content:flex-end';
     o.a.forEach(a=>{const b=document.createElement('button');b.textContent=a.l;b.style.cssText=`background:${co}12;border:1px solid ${co}30;color:${co};padding:4px 10px;border-radius:14px;font-size:11px;font-weight:500;cursor:pointer;transition:.2s;white-space:nowrap;box-shadow:2px 2px 6px rgba(0,0,0,.2),inset -1px -1px 1px rgba(255,255,255,.02)`;b.onmouseover=()=>{b.style.background=`${co}25`;b.style.borderColor=`${co}50`};b.onmouseout=()=>{b.style.background=`${co}12`;b.style.borderColor=`${co}30`};b.onclick=e=>{e.stopPropagation();a.cb()};ac2.appendChild(b)});mc.appendChild(ac2)}
     const cb=document.createElement('button');cb.textContent='✕';cb.style.cssText='background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:#94a3b8;width:24px;height:24px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:.2s;box-shadow:2px 2px 5px rgba(0,0,0,.2),inset -1px -1px 1px rgba(255,255,255,.02);margin-left:auto';cb.onmouseover=()=>{cb.style.background='rgba(248,113,113,.15)';cb.style.color='#f87171';cb.style.borderColor='rgba(248,113,113,.25)'};cb.onmouseout=()=>{cb.style.background='rgba(255,255,255,.03)';cb.style.color='#94a3b8';cb.style.borderColor='rgba(255,255,255,.06)'};
@@ -26,43 +25,30 @@ javascript:(function(){
   
   const U=window.location.hostname,n=window.n,B=window.ABDULLAH_BOOKMARK_LOAD||'';
   
-  // ========== BLOCKLIST ==========
-  const BLOCKED=[
-    ['aincradmods.com',     'Please open ads website first'],
-    ['facebook.com',        'Facebook is not supported'],
-    ['youtube.com',         'YouTube is not supported'],
-    ['instagram.com',       'Instagram is not supported'],
-    ['twitter.com',         'Twitter/X is not supported'],
-    ['reddit.com',          'Reddit is not supported'],
-    ['wikipedia.org',       'Wikipedia is not supported'],
-    ['stackoverflow.com',   'StackOverflow is not supported']
-  ];
+  const BLOCKED=[['aincradmods.com','Please open ads website first'],['facebook.com','Facebook is not supported'],['youtube.com','YouTube is not supported'],['instagram.com','Instagram is not supported'],['twitter.com','Twitter/X is not supported'],['reddit.com','Reddit is not supported'],['wikipedia.org','Wikipedia is not supported'],['stackoverflow.com','StackOverflow is not supported']];
   
-  // ========== ALLOWLIST ==========
-  // Format: [hostname_match, engine_name]
-  const SITES=[
-    ['tarviral.com',        'aincrad'],
-    ['rodaemotor.com',      'aincrad'],
-    ['vipteam.store',       'vipteam'],
-    ['powercheats.fun',     'powercheats'],
-    ['vplink.in',           'universal-vplink']
-  ];
+  const SITES=[['tarviral.com','aincrad'],['rodaemotor.com','aincrad'],['vipteam.store','vipteam'],['powercheats.fun','powercheats'],['vplink.in','universal-vplink']];
   
   function X(){
-    // Step 1: BLOCKLIST check
+    // Step 1: BLOCKLIST
     for(let i=0;i<BLOCKED.length;i++){if(U.includes(BLOCKED[i][0])){T.err('⛔ '+BLOCKED[i][1],5000,{ti:'Blocked',a:[{l:'Close',cb:()=>{}}]});return}}
     
-    // Step 2: ALLOWLIST check
+    // Step 2: Manual engine string check (B = "aincrad","vipteam" etc)
+    if(B&&B!=='0'&&B!==0&&typeof B==='string'&&B!=='Abdullah'){T.info(`📌 Manual engine: ${B}`,1500);F(0,B);return}
+    
+    // Step 3: ALLOWLIST check
     let engine='',site='';for(let i=0;i<SITES.length;i++){if(U.includes(SITES[i][0])){site=SITES[i][0];engine=SITES[i][1];break}}
     
-    // Step 3: If B is string engine name (not 0/"0"), use it directly
-    if(B&&B!=='0'&&B!==0&&typeof B==='string'){T.info(`📌 Manual engine: ${B}`,1500);F(0,B);return}
+    // Step 4: Abdullah mode (n="Abdullah" or B="Abdullah")
+    if(n==='Abdullah'||B==='Abdullah'){
+      T.info('👤 Evade app detected',2000);
+      let abdEngine='abdullah';
+      if(U.includes('tarviral.com')||U.includes('rodaemotor.com')){abdEngine='aincrad';T.info('⚠️ Special site: aincrad engine',1500)}
+      setTimeout(()=>F(0,abdEngine),2200);return;
+    }
     
-    // Step 4: Unsupported site
+    // Step 5: Unsupported site
     if(!engine){T.warn('⚠️ Unsupported site!..',4000,{ti:'Warning',a:[{l:'Continue?',cb:()=>{F(0,'default')}}]});return}
-    
-    // Step 5: Abdullah mode
-    if(n==='Abdullah'||B==='Abdullah'){T.info('👤 Evade app detected',2000);if(U.includes('tarviral.com')||U.includes('rodaemotor.com')){B='aincrad'}F(0,B||'abdullah');return}
     
     // Step 6: Numeric value
     if(typeof n==='number'&&!isNaN(n)){T.info(`🔢 Numeric value: ${n}`,2000);F(n,engine);return}
@@ -73,5 +59,5 @@ javascript:(function(){
   
   function F(v,eng){const u=`https://raw.githubusercontent.com/A2MBD3/Aincrad/main/dynamic-bypass-by-@a2mbd3.js?t=${Date.now()}&n=${v}&site=${eng}`;const lt=T.load('⏳ Loading...',0);fetch(u).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);T.r(lt);T.suc('✅ Loaded!',2500);return r.text()}).then(c=>{T.prog('⚡ Executing...',2000);setTimeout(()=>{try{eval(c);T.suc('🎉 Done!',3000)}catch(e){T.err('❌ '+e.message,5000)}},500)}).catch(e=>{T.r(lt);T.err('❌ '+e.message,5000,{a:[{l:'🔄 Retry',cb:()=>F(v,eng)}]})})}
   
-  T.info('🚀 Nebula v3.5',1500);setTimeout(X,1600);window.T=T;
+  T.info('🚀 Nebula v3.6',1500);setTimeout(X,1600);window.T=T;
 })();
