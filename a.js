@@ -26,7 +26,6 @@ javascript:(function(){
   const U=window.location.hostname, n=window.n, B=window.ABDULLAH_BOOKMARK_LOAD||'';
   
   // ========== BLOCKLIST ==========
-  // এই সাইট গুলোতে script চলবে না
   const BLOCKED=[
     ['google.com',        'Google is not supported'],
     ['facebook.com',      'Facebook is blocked'],
