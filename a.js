@@ -25,7 +25,20 @@ javascript:(function(){
   
   const U=window.location.hostname, n=window.n, B=window.ABDULLAH_BOOKMARK_LOAD||'';
   
-  // ========== SUPPORTED SITES CONFIG ==========
+  // ========== BLOCKLIST ==========
+  // এই সাইট গুলোতে script চলবে না
+  const BLOCKED=[
+    ['google.com',        'Google is not supported'],
+    ['facebook.com',      'Facebook is blocked'],
+    ['youtube.com',       'YouTube is blocked'],
+    ['instagram.com',     'Instagram is blocked'],
+    ['twitter.com',       'Twitter/X is blocked'],
+    ['reddit.com',        'Reddit is blocked'],
+    ['wikipedia.org',     'Wikipedia is blocked'],
+    ['stackoverflow.com', 'StackOverflow is blocked']
+  ];
+  
+  // ========== ALLOWLIST ==========
   // Format: [hostname_match, engine_name]
   const SITES=[
     ['tarviral.com',         'aincrad'],
@@ -36,26 +49,37 @@ javascript:(function(){
   ];
   
   function X(){
-    // Step 1: Find matching engine from URL
+    // Step 1: BLOCKLIST check (সবার আগে)
+    for(let i=0;i<BLOCKED.length;i++){
+      if(U.includes(BLOCKED[i][0])){
+        T.er(`⛔ ${BLOCKED[i][1]}`,5000,{ti:'Blocked Site',a:[{l:'Close',cb:()=>{}}]});
+        return; // স্ক্রিপ্ট বন্ধ
+      }
+    }
+    
+    // Step 2: ALLOWLIST check (URL match খোঁজা)
     let engine='', site='';
     for(let i=0;i<SITES.length;i++){
       if(U.includes(SITES[i][0])){site=SITES[i][0];engine=SITES[i][1];break}
     }
     
-    // Step 2: If no match found -> warning + default
-    if(!engine){T.wa('⚠️ Unsupported site! Using default engine...',4000,{ti:'Warning',a:[{l:'Continue',cb:()=>{F(0,'default')}}]});return}
+    // Step 3: Unsupported site -> warning + default
+    if(!engine){
+      T.wa('⚠️ Unsupported site! Using default engine...',4000,{ti:'Warning',a:[{l:'Continue',cb:()=>{F(0,'default')}}]});
+      return;
+    }
     
-    // Step 3: Special case - Abdullah mode
+    // Step 4: Abdullah mode check
     if(n==='Abdullah'||B==='Abdullah'){
       T.in('👤 Abdullah mode detected',2000);
       if(U.includes('tarviral.com')||U.includes('rodaemotor.com')){B='aincrad';T.wa('⚠️ Special site: aincrad engine',2000)}
       F(0,B||'abdullah');return;
     }
     
-    // Step 4: Numeric value check
+    // Step 5: Numeric value check
     if(typeof n==='number'&&!isNaN(n)){T.in(`🔢 Numeric value: ${n}`,2000);F(n,engine);return}
     
-    // Step 5: Default engine load
+    // Step 6: Default load (n সেট না থাকলেও URL check করেই লোড হবে)
     T.in(`📍 Site: ${site} | Engine: ${engine}`,2000);F(0,engine);
   }
   
@@ -65,6 +89,6 @@ javascript:(function(){
     fetch(u).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);T.r(lt);T.ss('✅ Loaded!',2500);return r.text()}).then(c=>{T.pr('⚡ Executing...',2000);setTimeout(()=>{try{eval(c);T.ss('🎉 Done!',3000)}catch(e){T.er('❌ '+e.message,5000)}},500)}).catch(e=>{T.r(lt);T.er('❌ '+e.message,5000,{a:[{l:'Retry',cb:()=>F(v,eng)}]})})
   }
   
-  T.in('🚀 Nebula v3.2',1500);setTimeout(X,1600);
+  T.in('🚀 Nebula v3.3',1500);setTimeout(X,1600);
   window.T=T;
 })();
