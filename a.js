@@ -44,7 +44,7 @@ javascript:(function(){
     ['rodaemotor.com',       'aincrad'],
     ['vipteam.store',        'vipteam'],
     ['powercheats.fun',      'powercheats'],
-    ['vplink.in',            'vplink']
+    ['vplink.in',            'universal-vplink']
   ];
   
   function X(){
