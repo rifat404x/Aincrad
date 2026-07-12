@@ -1,13 +1,13 @@
-# 🚀 Nebula - Open Source Revolution
+# 🚀 VIP PERSON ONLY - Open Source Revolution
 
-**Built with ❤️ by Abdullah Al Mamun**
-**[@A2MBD3](https://t.me/A2MBD3) | [a2mbd3.pages.dev](https://a2mbd3.pages.dev)**
+**Built with ❤️ by Ahmed Rifat**
+**[@rifat404x](https://github.com/rifat404x) | [Telegram Channel](https://t.me/+d4CwJgibp5FiYWU1)**
 
 ---
 
 ## 🌟 Welcome to the Future
 
-Aincrad is now **100% Open Source**! This project is dedicated to the global developer community - free, accessible, and ready for innovation.
+VIP PERSON ONLY is now **100% Open Source**! This project is dedicated to the global developer community - free, accessible, and ready for innovation.
 
 ---
 
@@ -22,6 +22,13 @@ Aincrad is now **100% Open Source**! This project is dedicated to the global dev
 - ✅ Contribute improvements
 
 ### 📋 Requirements:
-- 📝 Credit the original author
+- 📝 Credit the original author (Ahmed Rifat - @rifat404x)
 
 ---
+
+## 📖 Documentation
+
+For more information, join our Telegram channel: [https://t.me/+d4CwJgibp5FiYWU1](https://t.me/+d4CwJgibp5FiYWU1)
+
+**Original Project Inspiration:** Aincrad (by Abdullah Al Mamun)
+**Current Maintainer & Developer:** Ahmed Rifat (@rifat404x)
