@@ -39,7 +39,7 @@ javascript:(function(){
     // Step 3: ALLOWLIST check
     let engine='',site='';for(let i=0;i<SITES.length;i++){if(U.includes(SITES[i][0])){site=SITES[i][0];engine=SITES[i][1];break}}
     
-    // Step 4: Abdullah mode (n="Abdullah" or B="Abdullah")
+    // Step 4: Evade mode (n="Abdullah" or B="Abdullah")
     if(n==='Abdullah'||B==='Abdullah'){
       T.info('👤 Evade app detected',2000);
       let abdEngine='abdullah';
