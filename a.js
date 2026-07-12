@@ -24,13 +24,13 @@ javascript:(function(){
   const st=document.createElement('style');st.textContent='@keyframes progress{from{width:100%}to{width:0%}}';
   document.head.appendChild(st);
   
-  // ╔══════════════════════════════════════════════════════════╗
-  // ║  AUTHOR: Ahmed Rifat                                   ║
-  // ║  GITHUB: @rifat404x                                    ║
-  // ║  PROJECT: VIP PERSON ONLY                              ║
-  // ║  TELEGRAM: https://t.me/+d4CwJgibp5FiYWU1              ║
-  // ║  CREDITS: Ahmed Rifat (@rifat404x)                     ║
-  // ╚═══════════════════════���══════════════════════════════════╝
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  AUTHOR: Ahmed Rifat                               ║
+  // ║  GITHUB: @rifat404x                                ║
+  // ║  PROJECT: VIP PERSON ONLY                          ║
+  // ║  TELEGRAM: https://t.me/+d4CwJgibp5FiYWU1          ║
+  // ║  CREDITS: Ahmed Rifat (@rifat404x)                 ║
+  // ╚═══════════════════════════════════════════════════════╝
   
   const U=window.location.hostname,n=window.n,B=window.VIP_PERSON_ONLY_LOAD||'';
   
